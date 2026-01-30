@@ -211,7 +211,7 @@ async function predictAutoDraw() {
     const btnContainer = document.getElementById('ad-buttons');
     btnContainer.innerHTML = 'Loading...';
 
-    const response = await fetch('/api/run/autodraw/predict', {
+    const response = await fetch('https://nexus-api-2026.vercel.app/api/run/autodraw/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -240,7 +240,7 @@ async function predictAutoDraw() {
 // 3. Fetch SVG and Replace Canvas
 async function fetchAndDrawIcon(name) {
     // Calling backend to proxy the Google Storage request
-    const url = `/api/run/autodraw/icon?key=${API_KEY}&name=${name}&index=0`;
+    const url = `https://nexus-api-2026.vercel.app/api/run/autodraw/icon?key=${API_KEY}&name=${name}&index=0`;
     
     const response = await fetch(url);
     if(response.ok) {
@@ -276,7 +276,7 @@ async function fetchAndDrawIcon(name) {
                     <pre>
 import requests
 
-url = "http://your-domain.com/api/run/gpt"
+url = "https://nexus-api-2026.vercel.app/api/run/gpt"
 
 params = {
     "key": "sk-nx-XXXXXXXXXXXXXXXX",  # Your API Key
@@ -298,7 +298,7 @@ else:
 const apiKey = "sk-nx-XXXXXXXXXXXXXXXX";
 const prompt = "Explain quantum physics";
 
-const url = new URL("http://your-domain.com/api/run/gpt");
+const url = new URL("https://nexus-api-2026.vercel.app/api/run/gpt");
 url.search = new URLSearchParams({
     key: apiKey,
     model: "auto",
@@ -314,7 +314,7 @@ fetch(url)
                 <div class="code-block">
                     <h3>cURL Example</h3>
                     <pre>
-curl "http://your-domain.com/api/run/gpt?key=sk-nx-XXX&model=auto&prompt=Hello%20World"</pre>
+curl "https://nexus-api-2026.vercel.app/api/run/gpt?key=sk-nx-XXX&model=auto&prompt=Hello%20World"</pre>
                 </div>
             </div>
 
@@ -375,7 +375,7 @@ canvas.addEventListener('mouseup', () => {
 async function recognize() {
     const apiKey = "YOUR_API_KEY_HERE"; 
 
-    const response = await fetch('/api/run/draw', {
+    const response = await fetch('https://nexus-api-2026.vercel.app/api/run/draw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -405,7 +405,7 @@ async function recognize() {
                     <pre>
 import requests
 
-url = "http://your-domain.com/api/run/gemini"
+url = "https://nexus-api-2026.vercel.app/api/run/gemini"
 
 params = {
     "key": "sk-nx-XXXXXXXXXXXXXXXX",
@@ -420,7 +420,7 @@ print(response.text)</pre>
                     <h3>JavaScript (Fetch)</h3>
                     <pre>
 const apiKey = "sk-nx-XXXXXXXXXXXXXXXX";
-const url = `/api/run/gemini?key=${apiKey}&prompt=Write a haiku`;
+const url = `https://nexus-api-2026.vercel.app/api/run/gemini?key=${apiKey}&prompt=Write a haiku`;
 
 fetch(url)
   .then(res => res.text()) // Gemini returns raw text string
@@ -454,7 +454,7 @@ fetch(url)
     </div>
 
     <script>
-        const API_URL = ""; 
+        const API_URL = "https://nexus-api-2026.vercel.app"; 
         let currentBalance = 0;
 
         // Check Auth
@@ -473,7 +473,7 @@ fetch(url)
 
         async function fetchUserData() {
             try {
-                const res = await fetch('/api/user/me', { headers });
+                const res = await fetch('https://nexus-api-2026.vercel.app/api/user/me', { headers });
                 if(res.status === 401) logout();
                 const data = await res.json();
                 currentBalance = data.balance;
@@ -487,7 +487,7 @@ fetch(url)
             list.innerHTML = '<tr><td colspan="5" style="text-align:center">LOADING...</td></tr>';
             
             try {
-                const res = await fetch('/api/keys', { headers });
+                const res = await fetch('https://nexus-api-2026.vercel.app/api/keys', { headers });
                 const keys = await res.json();
                 
                 list.innerHTML = '';
@@ -526,7 +526,7 @@ fetch(url)
             }
 
             try {
-                const res = await fetch('/api/keys', {
+                const res = await fetch('https://nexus-api-2026.vercel.app/api/keys', {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({ name, limit })
@@ -544,7 +544,7 @@ fetch(url)
 
         async function deleteKey(id) {
             if(!confirm("REVOKE THIS KEY? ACTION IRREVERSIBLE.")) return;
-            await fetch(`/api/keys/${id}`, { method: 'DELETE', headers });
+            await fetch(`https://nexus-api-2026.vercel.app/api/keys/${id}`, { method: 'DELETE', headers });
             fetchKeys();
         }
 
@@ -582,3 +582,4 @@ fetch(url)
     </script>
 </body>
 </html>
+
