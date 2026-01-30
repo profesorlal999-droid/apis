@@ -1183,9 +1183,25 @@ async def get_sitemap():
     
     content = "\n".join(sitemap_xml)
     return Response(content=content, media_type="application/xml")
+
+@app.get("/robots.txt", include_in_schema=False)
+async def get_robots():
+    content = """User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /static/dashboard.html
+
+Sitemap: https://nexus-api-2026.vercel.app/sitemap.xml
+"""
+    # Замените домен в строке Sitemap на ваш реальный!
+    return Response(content=content, media_type="text/plain")
 # Импорт Response нужен в начале файла, если его нет:
 from fastapi import Response
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
