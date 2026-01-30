@@ -1155,8 +1155,37 @@ async def run_gemini(
     await db.commit()
 
     return ai_response
+
+@app.get("/sitemap.xml", include_in_schema=False)
+async def get_sitemap():
+    # Укажите здесь ваш реальный домен без слеша в конце
+    base_url = "https://nexus-api-2026.vercel.app"
+    
+    # Список страниц, которые вы хотите, чтобы Google нашел
+    # Не добавляйте сюда /dashboard (так как он закрыт паролем) и /api/...
+    pages = [
+        "/",           # Главная страница
+        "/login",      # Страница входа
+        "/register",   # Страница регистрации
+    ]
+    
+    sitemap_xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+    sitemap_xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    
+    for page in pages:
+        sitemap_xml.append('<url>')
+        sitemap_xml.append(f'  <loc>{base_url}{page}</loc>')
+        sitemap_xml.append('  <changefreq>daily</changefreq>') # Как часто меняется
+        sitemap_xml.append('  <priority>0.8</priority>')       # Приоритет (0.0 - 1.0)
+        sitemap_xml.append('</url>')
+        
+    sitemap_xml.append('</urlset>')
+    
+    content = "\n".join(sitemap_xml)
+    return Response(content=content, media_type="application/xml")
 # Импорт Response нужен в начале файла, если его нет:
 from fastapi import Response
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
