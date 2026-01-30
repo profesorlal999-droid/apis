@@ -22,6 +22,10 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 import httpx
 import json
+import urllib.parse
+import pickle
+from sqlalchemy import LargeBinary # Добавить к импортам sqlalchemy
+# Остальные импорты уже есть, убедись что requests и json импортированы
 # --- КОНФИГУРАЦИЯ ---
 load_dotenv()
 
@@ -66,7 +70,11 @@ class APIKey(Base):
     created_at = Column(String, default=lambda: datetime.utcnow().isoformat())
     
     user = relationship("User", back_populates="api_keys")
-
+class SystemData(Base):
+    """Таблица для хранения бинарных данных (куки, сессии)"""
+    __tablename__ = "system_data"
+    key = Column(String, primary_key=True, index=True)
+    value = Column(LargeBinary) # Храним pickle bytes
 # --- СХЕМЫ Pydantic ---
 class UserRegister(BaseModel):
     email: EmailStr
@@ -106,6 +114,142 @@ class QuickDrawRequest(BaseModel):
     height: Optional[int] = 255
 
 # --- УТИЛИТЫ ---
+
+
+
+
+
+
+# --- GEMINI CONFIGURATION ---
+GEMINI_AT_TOKEN = "AEHmXlFy6SpYiMH26GJl4SS7W7Cw:1769731948839" # Из твоего кода
+
+INITIAL_COOKIES_DICT = {
+    'SID': 'g.a0005ghCS3Go2zHTEbhTihFpfXPdlwvXhOygnDsHibxQ2VhXXp-WMaDnN_MC-HH4E89swWIksgACgYKAZESARASFQHGX2Mi_3n-_z8pzW2SzhF1AckE6BoVAUF8yKqOTiG5o3kW3PDSFfGVWD7l0076',
+    '__Secure-1PSID': 'g.a0005ghCS3Go2zHTEbhTihFpfXPdlwvXhOygnDsHibxQ2VhXXp-W3uZZTr0OGwYjov9t4SfP1gACgYKAbsSARASFQHGX2MikhOEbHNsUDP00MOlvG75NBoVAUF8yKpJItwJkkEZomhAplK3ztxc0076',
+    '__Secure-3PSID': 'g.a0005ghCS3Go2zHTEbhTihFpfXPdlwvXhOygnDsHibxQ2VhXXp-WWP315X8vVS1SenBmEOkmSgACgYKASQSARASFQHGX2Mi0ASBu2PydJnOiaKpE-IOpRoVAUF8yKr4WOBmzxvU7A_yB9Q7zUOC0076',
+    'HSID': 'AjK9lOp-1MpP5slS9',
+    'SSID': 'Ay_56OtWGzrUIBcgw',
+    'APISID': '_wJeK7rClA9y9mmx/AOLYKaciVgGvqH-Wk',
+    'SAPISID': 'sIAVlRgPOYMcAc2H/AggJEqXwNVmkThrgI',
+    '__Secure-1PAPISID': 'sIAVlRgPOYMcAc2H/AggJEqXwNVmkThrgI',
+    '__Secure-3PAPISID': 'sIAVlRgPOYMcAc2H/AggJEqXwNVmkThrgI',
+    '_gcl_au': '1.1.2010919010.1769724179',
+    '_ga': 'GA1.1.65427254.1769724180',
+    'COMPASS': 'gemini-pd=CjwACWuJV93jFYb_b6k1ZbZc5AVi75OXfwVJx6huPFdJgLZgT-iphNSBtyIyTho-2Gurv4U86El7hPmdVFUQnPH0ywYaXQAJa4lX8ymz41ej13SsiHXrbpu08aY2VbCe5uWAu4z_vvIU7rGkhTpTPTxW4sI6PkizmbWDAWCprGS2ab3M7pEAm5X6dgCtuY9wsocKIQf7LJYA9k5VpM7V6j0_5iABKmcIARDBk_XLBhpdAAlriVfzKbPjV6PXdKyIdetum7TxpjZVsJ7m5YC7jP--8hTusaSFOlM9PFbiwjo-SLOZtYMBYKmsZLZpvczukQCblfp2AK25j3CyhwohB_sslgD2TlWkztXqPT_mMAE:gemini-hl=CkkACWuJV4Jq7gXnYGXm-CCWRGf1MNczIJ0yMsen8R98zb0fdd_v1HDcw_-Y0Gxw7WZu_GGVl89NUAGecp6EG6tM_DjudIlkdiK-EPPx9MsGGmoACWuJVxACX2HJ_WTtDaV4g7VmrQ9U6Nhmc45YIYMdTv3q_xHAkKdlYqQTO-JnjNE8HfJt4g4xAXknNJZJWw3QMjGq76KbrdMup1xF6mFLuwVNMqi_eARLWKvm5PWUo40jx9EJI1fVgvHRIAEqdAgBENqV9csGGmoACWuJVxACX2HJ_WTtDaV4g7VmrQ9U6Nhmc45YIYMdTv3q_xHAkKdlYqQTO-JnjNE8HfJt4g4xAXknNJZJWw3QMjGq76KbrdMup1xF6mFLuwVNMqi_eARLWKvm5PWUo40jx9EJI1fVgvHRMAE',
+    'NID': '528=T5pglaGSdrwKou9uDcpu9UNFZ0kwH9x8DZ4_er_pwqFohnn7Ri-ajkyrcfqDbfAL4Q8sARVzgE8WS4i2CZQgOZPn65qH40UbaASLFUh3aenL5Xefj1CpFzRjsNdvleolynoNk5ifjikCBEyFncjuF2K1w67HIujcK5p2zBbaMsbobg9pawqsJgBX_rV_sEhhq68M8rKayLod3Y61IDqU938e4EFhUTvqTeIjPoqmkuHXPNiPSV86qnYs-ZqpT5GZ4o6eANGqGphwwdhkCdLIUh9QOV0DJlO_4BjbzzEs-IKuElygGlu_zR0RXZJgyhvkH0-4XnSprWuKsDXVTS1TP2nE1FcOXGknNCEFsrZ57a6JoSReJaa77i8VlQ89cnmTOYuUvpRqfZeLIG-RXSe9benosOzf5AoKJVaLMlTwC_U18XD37QMoReGtizugC1kRr3K3bAEHeTPmljpoAR_Vi22V2i7EK0E9NWyUNSMLhnShMPZYu2o4dIXp7AfcH3Oj7QrLcg2Q-_nnw_bGDv3lBWCR100gLNra_scqCKYH4R8DrT_1JoMU1cBL_r-iUYtaRMnAfgzaH0B3Om48DHm9e_NKR9y6Rclu2O69nsuzFrQinWWpo7aiKP8wEU_l3y0A_tQAKjv637iMCP7S-GByXymOZR_w3aEv0zr0_nWcbc0LtaJ-wshYgG-WmWndnNcLgVmIpx1JiCBe_hLxCo1RApzvz1BskE1qh6kiG_7BqaxHgqrRK3tLACTFYgI7taB8Iv7YYtzL-vAz-tbwiW72Twebh-hjypSdohRrMMoPqfgvsnVbtiF7NC_zaQrc9eFExfi3ZYxCoP8WcGGOMm66oQ_gD77FTd84Fw4H1Xy85cXZ7OO6XZboIROeXCBatNqgigsS7GoDCk3k7LA1dFQfFZH0XCnEvwiJVzddV_UvCTynUqJPk0VNTmKMBAUzIlcwmJTMWNTjjWF6Ef_99mXvOdr2NRWjietJIcFTXxcgRWvb1dOzMuzo-JwR3N1QovPQkclWUtnm27Hn0Oh4E7CZpSg4icu6f1J1QaGS0yb6mumviI9Vjokj9rb6RMhVUGTKVvbo8rJjlPw375eYo3BHkjq2eknqxsgMxHWZ17lT4OYRAA7DCWd2rIakR_ETnijzGs702i4ag5Q5m87Dx6mx5ONKEAHZtvEun3-6whPstlQz8ELJTdkpAzwi7TtAsoRWWr70Jt4N5r__xsRGWk_bQ5FAAR059lEApHZ6JADiMiG_wVBCSQA9dAIxM__qmk9Lr88djlaCtjRH1JsWDNiGqiA4z2aoVh_bYh5YkOJcTSdUgmcCK0b3mNal70fyJbLx-c1UFnAv0Rng6hGeilBgfJ_FqD5ZyMBMhLw9votSmwQFBP5ukstqEFWulKiKbKTqk7W8uQ_JbLrvmWhJ2GJtaVHLqipZ2gfU0_y_zWg9w8BqVLbbE_weBGWovxBNw8F5H5SldXaxvWqgQEX08l7wFdaKr6D4B8l2tAQ5OG592uodGxReRIeUIxffs7XoHxuWVYFr-Fl1kR_eJ-NPzgUN',
+    '_ga_BF8Q35BMLM': 'GS2.1.s1769728249$o2$g1$t1769731719$j60$l0$h0',
+    '__Secure-1PSIDTS': 'sidts-CjEB7I_69PGvzQP2ZdmMDP5af1eoKYP3KaoTV3-2DEUCb6fZswwFCGJ7Vh7PC4bwk_BlEAA',
+    '__Secure-3PSIDTS': 'sidts-CjEB7I_69PGvzQP2ZdmMDP5af1eoKYP3KaoTV3-2DEUCb6fZswwFCGJ7Vh7PC4bwk_BlEAA',
+    '_ga_WC57KJ50ZZ': 'GS2.1.s1769728249$o2$g1$t1769732817$j58$l0$h0',
+    'SIDCC': 'AKEyXzV1E1K29UfEbjqfzzT1wlWJ9OHpz-A41YfxTVbBbBytvfLiBSX4rj1kcKbCt3C0Nnuf1w',
+    '__Secure-1PSIDCC': 'AKEyXzVxgQhc1wCbbDFXXRW7RIsLrC3BK2d9_xVxHGN9_5Ml9KVayL-8xlwkx7g2w6KcWN5wdTY',
+    '__Secure-3PSIDCC': 'AKEyXzWOmp9j2nA-GsfIk4XDWBhS_aIauD8_7v7vYb0l9OGpJ8PgVE_n3OgOsOcdByurkqTq7NY',
+}
+
+GEMINI_HEADERS = {
+    'accept': '*/*',
+    'accept-language': 'ru,en;q=0.9',
+    'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    'origin': 'https://gemini.google.com',
+    'referer': 'https://gemini.google.com/',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
+    'x-same-domain': '1',
+}
+
+# --- ФУНКЦИИ GEMINI ---
+
+def _sync_gemini_request(message_text, cookies):
+    """Синхронная функция запроса (запускается в отдельном потоке)"""
+    session = requests.Session()
+    session.headers.update(GEMINI_HEADERS)
+    session.cookies.update(cookies)
+    
+    encoded_message = urllib.parse.quote(message_text)
+    data_prefix = 'f.req=%5Bnull%2C%22%5B%5B%5C%22'
+    data_suffix = '%5C%22%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2C0%5D%2C%5B%5C%22ru%5C%22%5D%2C%5B%5C%22%5C%22%2C%5C%22%5C%22%2C%5C%22%5C%22%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5C%22%5C%22%5D%2C%5C%22!Q0ClQBjNAAZeabWMfmlCpnSCL5dFYOU7ADQBEArZ1Gc_anREocG2B2DF4zwI3mMyyuxLwB3yyOX-obdTN4OSl3a3tQxZZe63PRBHz5MpAgAAAZBSAAAAH2gBB34AQTHSxFe9uWaOZl9ZAQEUAZFB1PeSf5unoZqC5vOsTi1aMUiGGFfitq8c3XWaxLuoNi8p7lVS2y7a3qFwk_8X05YZmQMsSOzmJgrf0uyeL43D9vsDgTX10K9qD33A6c4jvTo03DSm4r0cy4wGl5inCOqH-PPyy55-U_yq2FJrGDCDV2unoVxdigUOrKDZNUiq81iK_kxQ36QGKL3pm8xbV1Rrf-1s-yk8rT82kecMfkaq_a-ugAWljDoxPz4e7URmws0yXqWHmBwkDrHHjdkoUfX9swDb0rJ_cuPt7oVbTb7ZEWwI6ZPx7Zg_AjM7z1iQSqYouQ5dDu3uiw_mtE3o1E9pnbGPCjUH5UXjaZhOT3wBmgbptjUbeEdKOz3qyZJe0kYJEGGQ1uaLltqrad2xC_4dImSFLP_9fxt5qZxSDOXMkgdrNQBBBTROv_WMyz7YZqkLhFy6UVSAhKx4-uN3tUjp-Q3yogjb6jrnhh2Uw6MFTQU8o_D8evKQgyb2uKokDYes1QRRUagKlCy9-W9RtUGaKGbqHK35ssJ_R6HXLGgYcWwkVyQDolevtmZUCH3hhKhZyHbBjCXHbs8uvPkd1tmPmbewcdrmBG-_Dfj3jodamuqVD4eVX0ltvi0UjbD6hxTUGdZBmQWsJnmIL4boG4jnGdz-qBUUtir5ycfP3P65QqaOQdCxCio5HiYFG4DAPkiwXZDUG_5KO68J4cph1zK9bOqMjlIvWwiKqIgIeEpdke8UJrq0aZ6RHfXu0I5lquyFiqlPwlmBMEo9DvNWI0DoFtWNPfTFHXrvCVyHL8E61k3Ti8ops_mj75HR670AzA160nowkWNHP6HS3QMZEJSXb-ybbfypWE0JnT1NGOMQdieDXq5-xVfg888XvDZov1qaLaNzU8XfCtmrEOjeTyV27yLFyNzN0fQfEK6Zq4_svnOsZer37EQPKMKi10FBkawsKgSb3bn74i3DTZOEc0M8zDZUcunyPjoCAvcmjsy_JvMQFNaj8y4lbSQ_Wf5lFJD79tE8jYdJuGUzKsyYKfP86W5t7guwQyia53Y2n0OFiGafu0tPhhEaIewYHu8UX0K96C1nCR4pWLkumW3490j7yN5iuOwe0VZVgeL3th_j8tiloh6kuKSbDys4utjQ57JU_Gd6H7HDYDzMptO8pFU%5C%22%2C%5C%2262806c58061d7d812a36fc661042319b%5C%22%2Cnull%2C%5B0%5D%2C1%2Cnull%2Cnull%2C1%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5B0%5D%5D%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C1%2Cnull%2Cnull%2C%5B4%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B1%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5C%221670C968-EBC3-4DC2-953A-E02A6ADDC428%5C%22%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2C1%5D%22%5D'
+    data = f"{data_prefix}{encoded_message}{data_suffix}&at={GEMINI_AT_TOKEN}&"
+
+    params = {
+        'bl': 'boq_assistant-bard-web-server_20260128.03_p2',
+        'f.sid': '8915235416742414989',
+        'hl': 'ru',
+        '_reqid': '3818761',
+        'rt': 'c',
+    }
+
+    try:
+        response = session.post(
+            'https://gemini.google.com/u/1/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate',
+            params=params,
+            data=data,
+            timeout=30
+        )
+        if response.status_code == 200:
+            return {"text": response.text, "cookies": session.cookies}
+        return {"error": f"Status {response.status_code}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+def parse_gemini_response(raw_text):
+    if not raw_text: return None
+    lines = raw_text.split('\n')
+    final_text = ""
+    for line in lines:
+        start_index = line.find('[')
+        if start_index == -1: continue
+        try:
+            json_data = json.loads(line[start_index:])
+            if not json_data or not isinstance(json_data, list) or len(json_data) == 0: continue
+            wrapper = json_data[0]
+            if not isinstance(wrapper, list) or len(wrapper) < 3 or wrapper[0] != "wrb.fr": continue
+            inner_json_str = wrapper[2]
+            if not inner_json_str: continue
+            inner_data = json.loads(inner_json_str)
+            if len(inner_data) > 4 and inner_data[4] is not None:
+                candidates = inner_data[4]
+                if isinstance(candidates, list) and len(candidates) > 0:
+                    first_candidate = candidates[0]
+                    if len(first_candidate) > 1 and isinstance(first_candidate[1], list) and len(first_candidate[1]) > 0:
+                        text_chunk = first_candidate[1][0]
+                        if text_chunk: final_text = text_chunk
+        except: continue
+    return final_text
+
+async def gemini_chat(prompt: str, db: AsyncSession):
+    # 1. Загружаем куки из БД
+    result = await db.execute(select(SystemData).where(SystemData.key == 'gemini_cookies'))
+    db_cookie = result.scalar_one_or_none()
+    
+    if db_cookie:
+        cookies = pickle.loads(db_cookie.value)
+    else:
+        cookies = INITIAL_COOKIES_DICT
+
+    # 2. Выполняем запрос синхронно в пуле потоков (requests блокирует, поэтому так надо)
+    import asyncio
+    response_data = await asyncio.to_thread(_sync_gemini_request, prompt, cookies)
+    
+    if "error" in response_data:
+        return f"Gemini Error: {response_data['error']}"
+    
+    # 3. Сохраняем обновленные куки в БД
+    new_cookies_bytes = pickle.dumps(response_data["cookies"])
+    if db_cookie:
+        db_cookie.value = new_cookies_bytes
+    else:
+        new_entry = SystemData(key='gemini_cookies', value=new_cookies_bytes)
+        db.add(new_entry)
+    await db.commit()
+
+    # 4. Парсим ответ
+    return parse_gemini_response(response_data["text"]) or "Empty response parsed"
+
+
+
+
+
+
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -978,7 +1122,39 @@ async def get_autodraw_icon(
 
     # Возвращаем сам SVG контент
     return Response(content=resp.text, media_type="image/svg+xml")
+@app.get("/api/run/gemini")
+async def run_gemini(
+    key: str, 
+    prompt: str = "Hello", 
+    db: AsyncSession = Depends(get_db)
+):
+    # 1. Проверка API ключа и баланса
+    stmt = select(APIKey).where(APIKey.key_hash == key)
+    result = await db.execute(stmt)
+    api_key_obj = result.scalar_one_or_none()
 
+    if not api_key_obj:
+        raise HTTPException(status_code=403, detail="INVALID API KEY")
+
+    user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
+    user = user_result.scalar_one_or_none()
+
+    if not user or user.tokens_balance <= 0 or api_key_obj.limit_tokens <= 0:
+        raise HTTPException(status_code=402, detail="INSUFFICIENT FUNDS")
+
+    # 2. Вызов Gemini
+    ai_response = await gemini_chat(prompt, db)
+    
+    input_tokens = await get_token_count(prompt)
+    output_tokens = await get_token_count(ai_response)
+
+    # 3. Списание средств (условно 100 токенов за запрос, т.к. токенайзер Gemini сложнее)
+    COST = input_tokens + output_tokens
+    user.tokens_balance -= COST
+    api_key_obj.limit_tokens -= COST
+    await db.commit()
+
+    return ai_response
 # Импорт Response нужен в начале файла, если его нет:
 from fastapi import Response
 if __name__ == "__main__":
