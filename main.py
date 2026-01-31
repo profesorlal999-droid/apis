@@ -1183,10 +1183,19 @@ async def run_gpt_image(
 
     try:
         # ==========================================
-        # НАЧАЛО ТВОЕГО КОДА (ТОЧЬ-В-ТОЧЬ)
+        # ИНИЦИАЛИЗАЦИЯ TLS_CLIENT
         # ==========================================
+        import tls_client
 
-        # --- 1. PREPARE ---
+        # Создаем сессию с отпечатком Chrome 120
+        session = tls_client.Session(
+            client_identifier="chrome_120",
+            random_tls_extension_order=True
+        )
+
+        # ==========================================
+        # ШАГ 1: PREPARE (Получение токена)
+        # ==========================================
         cookies = {
             '_ga': 'GA1.1.1379913415.1767064677',
             'gfsessionid': '3vpn450b3s4zj0dg2joermikyaguhz18',
@@ -1195,7 +1204,7 @@ async def run_gpt_image(
             'oai-nav-state': '1',
             'oai-client-auth-info': '%7B%22user%22%3A%7B%22name%22%3A%22lzilnRqE%7C%22%2C%22email%22%3A%22lzilnRqE%7C%22%2C%22picture%22%3A%22%2Favatars.png%22%2C%22connectionType%22%3A2%2C%22timestamp%22%3A1769841830434%7D%2C%22isOptedOut%22%3Afalse%7D',
             '_ga_9SHBSK2D9J': 'GS2.1.s1769841202$o30$g1$t1769842895$j34$l0$h0',
-            'cf_clearance': 'jJyWmg.xPbR6ZmoGFl0v0KyoeCx6si2mYk9XN3mvYWg-1769846486-1.2.1.1-khh70TMg1fk53kH2NmA9j3lIYIwLcjLuiYDx3bgShaXvIyvUICXq_3poDmlQzLrg7kmbGpk5znKCocouCu0hsVxM1wb6YOrQfvume8H14t4GyXM3rcplQTaSKG8ghdxMCWuNz7XS8y.VCaVqUO4zcnokQ05PoYuzG4ifcJL5hTpOa.tm.wRvyV50N5ZBmidB6e72V8d_qSZ89tC9mVTGQP75lZp9C1HtMJ3xAf8yqgM',
+            # 'cf_clearance': '...', # ЗАКОММЕНТИРОВАНО: Мешает работе на сервере
             '_dd_s': 'aid=a58c92c5-f6c4-4d39-971b-6cee1f56ab45&logs=1&id=f346f767-f50a-405b-b0dc-97186e90cd7b&created=1769841098870&expire=1769843798274',
         }
 
@@ -1241,29 +1250,32 @@ async def run_gpt_image(
             'client_contextual_info': {'app_name': 'chat.chatgptplus.cn'},
         }
 
-        response = requests.post(
+        # Выполняем запрос через session.post
+        response = session.post(
             'https://chat.chatgptplus.cn/backend-api/f/conversation/prepare',
             cookies=cookies,
             headers=headers,
             json=json_data,
-            impersonate="chrome120"
         )
+
         if response.status_code != 200:
-            print(f"DEBUG ERROR [Prepare]: Status {response.status_code}")
-            print(f"Response Body: {response.text[:500]}") # Выведет первые 500 символов ошибки
-            raise HTTPException(status_code=response.status_code, detail=f"Target API Error: {response.text[:100]}")
+            print(f"[Prepare Error]: {response.text[:200]}")
+            raise HTTPException(status_code=response.status_code, detail="Proxy Error: Prepare failed")
 
-        conduit_token = response.json()['conduit_token']
+        conduit_token = response.json().get('conduit_token')
+        if not conduit_token:
+             raise HTTPException(status_code=500, detail="Failed to retrieve conduit token")
 
-        # --- 2. CHAT REQUEST ---
-        # Обновляем токены и куки, как в твоем скрипте
+        # ==========================================
+        # ШАГ 2: CHAT REQUEST (Генерация)
+        # ==========================================
         cookies = {
             '_ga': 'GA1.1.1379913415.1767064677',
             'gfsessionid': '3vpn450b3s4zj0dg2joermikyaguhz18',
             '_account': 'eff23844-b9f4-437a-901c-a547119353a9',
             'oai-last-model-config': '%7B%22model%22%3A%22gpt-5-2-pro%22%7D',
             'oai-nav-state': '1',
-            'cf_clearance': 'jJyWmg.xPbR6ZmoGFl0v0KyoeCx6si2mYk9XN3mvYWg-1769846486-1.2.1.1-khh70TMg1fk53kH2NmA9j3lIYIwLcjLuiYDx3bgShaXvIyvUICXq_3poDmlQzLrg7kmbGpk5znKCocouCu0hsVxM1wb6YOrQfvume8H14t4GyXM3rcplQTaSKG8ghdxMCWuNz7XS8y.VCaVqUO4zcnokQ05PoYuzG4ifcJL5hTpOa.tm.wRvyV50N5ZBmidB6e72V8d_qSZ89tC9mVTGQP75lZp9C1HtMJ3xAf8yqgM',
+            # 'cf_clearance': '...', # ЗАКОММЕНТИРОВАНО
             'oai-client-auth-info': '%7B%22user%22%3A%7B%22name%22%3A%22lzilnRqE%7C%22%2C%22email%22%3A%22lzilnRqE%7C%22%2C%22picture%22%3A%22%2Favatars.png%22%2C%22connectionType%22%3A2%2C%22timestamp%22%3A1769842901619%7D%2C%22isOptedOut%22%3Afalse%7D',
             '_ga_9SHBSK2D9J': 'GS2.1.s1769841202$o30$g1$t1769842999$j59$l0$h0',
             '_dd_s': 'aid=a58c92c5-f6c4-4d39-971b-6cee1f56ab45&logs=1&id=f346f767-f50a-405b-b0dc-97186e90cd7b&created=1769841098870&expire=1769843924294',
@@ -1335,31 +1347,39 @@ async def run_gpt_image(
             'force_parallel_switch': 'auto',
         }
 
-        response = requests.post(
+        response = session.post(
             'https://chat.chatgptplus.cn/backend-api/f/conversation',
             cookies=cookies,
             headers=headers,
             json=json_data,
-            impersonate="chrome120"
-        ).text
+        )
+        
+        if response.status_code != 200:
+            print(f"[Chat Error]: {response.text[:200]}")
+            raise HTTPException(status_code=response.status_code, detail="Proxy Error: Chat failed")
 
-        # --- 3. EXTRACT FILE ID ---
+        response_text = response.text
+
+        # ==========================================
+        # ШАГ 3: EXTRACT FILE ID
+        # ==========================================
         pattern = r"file_[0-9a-f]{32}"
-        matches = re.findall(pattern, response)
+        matches = re.findall(pattern, response_text)
         
         if not matches:
              raise HTTPException(status_code=500, detail="Image generation failed (No file ID found in response)")
         
         extracted_file_id = matches[-1]
 
-        # --- 4. GET DOWNLOAD URL ---
-        # Снова обновляем куки/хедеры, как в скрипте для шага скачивания
+        # ==========================================
+        # ШАГ 4: GET DOWNLOAD URL
+        # ==========================================
         cookies = {
             '_ga': 'GA1.1.1379913415.1767064677',
             'gfsessionid': '3vpn450b3s4zj0dg2joermikyaguhz18',
             '_account': 'eff23844-b9f4-437a-901c-a547119353a9',
             'oai-last-model-config': '%7B%22model%22%3A%22gpt-5-2-pro%22%7D',
-            'cf_clearance': 'y_GwzddivUK6AfBirUJ08_3l9SMCDb65m52RQkzy8QY-1769844798-1.2.1.1-88lILugwwf5jQ8uNqQYSNPz1ZQVUPvi.SzRt6yMWzSvEQA_TWMOEU923ZhPoC_XvN.tIsXqxzvE8Eu79..J7yOOK44On8q9B4p1ZVzLuF99Exze6g0.Z4P0YOQTSnt2JUqOd0myRF85MPF4Wbt8NsGb434fwrKleH66plaeCmMxU_LIKvraUpI7kAxlYOXuP57Fr6m7FsZawnZWxxg5quf.C.Rho30vOWwhDxs2fkOo',
+            # 'cf_clearance': '...', # ЗАКОММЕНТИРОВАНО
             'oai-nav-state': '1',
             '_ga_9SHBSK2D9J': 'GS2.1.s1769841202$o30$g1$t1769841348$j8$l0$h0',
             'oai-client-auth-info': '%7B%22user%22%3A%7B%22name%22%3A%22lzilnRqE%7C%22%2C%22email%22%3A%22lzilnRqE%7C%22%2C%22picture%22%3A%22%2Favatars.png%22%2C%22connectionType%22%3A2%2C%22timestamp%22%3A1769841830434%7D%2C%22isOptedOut%22%3Afalse%7D',
@@ -1396,23 +1416,28 @@ async def run_gpt_image(
             'inline': 'false',
         }
 
-        url_info = requests.get(
+        url_info_resp = session.get(
             f'https://chat.chatgptplus.cn/backend-api/files/download/{extracted_file_id}',
             params=params,
             cookies=cookies,
             headers=headers,
-        ).json()
-        
-        # Получаем URL
+        )
+
+        if url_info_resp.status_code != 200:
+             print(f"[Url Info Error]: {url_info_resp.text[:200]}")
+             raise HTTPException(status_code=url_info_resp.status_code, detail="Proxy Error: Failed to get download link")
+
+        url_info = url_info_resp.json()
         download_url = url_info.get('download_url')
         if not download_url:
             raise HTTPException(status_code=500, detail=f"Failed to get URL info: {url_info}")
 
         final_url = f"https://chat.chatgptplus.cn{download_url}"
 
-        # --- 5. DOWNLOAD AND PROXY ---
-        # Скачиваем файл в память и сразу отдаем пользователю
-        img_response = requests.get(final_url, headers=headers, cookies=cookies, stream=True)
+        # ==========================================
+        # ШАГ 5: DOWNLOAD AND PROXY
+        # ==========================================
+        img_response = session.get(final_url, headers=headers, cookies=cookies)
 
         if img_response.status_code == 200:
             # Списываем баланс только в самом конце
@@ -1427,6 +1452,10 @@ async def run_gpt_image(
 
     except Exception as e:
         print(f"GPT Image Error: {e}")
+        # Если это уже наш HTTPException, кидаем его дальше
+        if isinstance(e, HTTPException):
+            raise e
+        # Иначе оборачиваем
         raise HTTPException(status_code=500, detail=str(e))
 @app.get("/api/run/gpt-image")
 async def run_gpt_image_get(
@@ -1445,5 +1474,6 @@ async def run_gpt_image_get(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
