@@ -4,333 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="pwQjux5M7sqbd2hyHm4iyQxz2sUOb-4ae3eT-PVBFaM" />
-    <title>NEXUS API</title>
-    <meta name="description" content="Бесплатный API шлюз для разработчиков. Подключите ChatGPT, Gemini, Imagen и AutoDraw к своим проектам через единый интерфейс. 100k токенов бесплатно при регистрации.">
-    <meta name="keywords" content="AI api, GPT API,ChatGPT free,  Gemini API, AutoDraw, FREE AI API, Unlimited AI, unlimited GPT, unlimited gemini, NEXUS, NEXUS API">
-    <!-- Подключаем шрифты от Google -->
+    <meta name="description" content="Unified AI API Gateway for developers. Integrate ChatGPT, GPT-4, Gemini, and DALL-E with a single API key. Sign up now and get 100,000 free tokens.">
+<meta name="keywords" content="AI API, ChatGPT API, Gemini API, GPT-4 integration, DALL-E API, free AI tokens, unified LLM gateway, AI for developers, Nexus API">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- Основные стили --- */
         :root {
             --neon-blue: #00f3ff;
             --neon-purple: #bc13fe;
             --bg-dark: #050505;
-            --bg-panel: #0a0a0a;
-            --text-main: #e0e0e0;
             --grid-color: rgba(0, 243, 255, 0.05);
+            --text-main: #e0e0e0;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Roboto Mono', monospace;
+            background-color: var(--bg-dark); color: var(--text-main); font-family: 'Roboto Mono', monospace;
             overflow-x: hidden;
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 40px 40px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            min-height: 100vh; display: flex; flex-direction: column;
         }
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+        .highlight-blue { color: var(--neon-blue); text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); display: inline-block; }
+        .highlight-purple { color: var(--neon-purple); text-shadow: 0 0 10px rgba(188, 19, 254, 0.5); display: inline-block; }
 
-        /* --- Типографика --- */
-        h1, h2, h3 {
-            font-family: 'Orbitron', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .highlight-blue {
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-            display: inline-block; /* Исправляет обрезку теней */
-        }
-
-        .highlight-purple {
-            color: var(--neon-purple);
-            text-shadow: 0 0 10px rgba(188, 19, 254, 0.5);
-            display: inline-block; /* Исправляет обрезку теней */
-        }
-
-        /* --- Header --- */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 5%;
-            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
-            backdrop-filter: blur(10px); /* Усилен блюр для читаемости */
-            background: rgba(5, 5, 5, 0.7); /* Добавлен фон для контраста */
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            gap: 20px; /* Чтобы лого и кнопки не слипались */
+            display: flex; justify-content: space-between; align-items: center; padding: 20px 5%;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2); backdrop-filter: blur(10px);
+            background: rgba(5, 5, 5, 0.7); position: fixed; width: 100%; top: 0; z-index: 100;
         }
+        .logo { font-size: 1.5rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .logo span { display: inline-block; width: 10px; height: 10px; background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            white-space: nowrap; /* Логотип не должен переноситься */
-            flex-shrink: 0;
-        }
+        .header-actions { display: flex; align-items: center; gap: 20px; }
 
-        .logo span {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
+        /* Language Selector */
+        .lang-select {
+            background: transparent; border: 1px solid #333; color: #aaa;
+            padding: 5px 10px; font-family: 'Roboto Mono'; cursor: pointer;
+            transition: 0.3s; outline: none;
         }
-
-        /* --- Кнопки --- */
-        .btn-group {
-            display: flex;
-            gap: 20px;
-            flex-shrink: 0; /* Кнопки не должны сжиматься */
-        }
+        .lang-select:hover { border-color: var(--neon-blue); color: #fff; }
+        .lang-select option { background: #000; color: #fff; }
 
         .btn {
-            padding: 10px 25px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-decoration: none;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-            position: relative;
+            padding: 10px 25px; font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700; text-decoration: none;
+            border: 1px solid transparent; transition: all 0.3s ease; cursor: pointer; display: inline-block;
             clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
-            cursor: pointer;
-            white-space: nowrap; /* Текст кнопок не переносится */
-            display: inline-block;
         }
+        .btn-login { color: var(--neon-blue); border: 1px solid var(--neon-blue); background: transparent; }
+        .btn-login:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+        .btn-register { background: var(--neon-purple); color: #fff; border: 1px solid var(--neon-purple); }
+        .btn-register:hover { background: transparent; color: var(--neon-purple); box-shadow: 0 0 15px rgba(188, 19, 254, 0.4); }
 
-        .btn-login {
-            color: var(--neon-blue);
-            border: 1px solid var(--neon-blue);
-            background: transparent;
-        }
-
-        .btn-login:hover {
-            background: rgba(0, 243, 255, 0.1);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
-            text-shadow: 0 0 5px var(--neon-blue);
-        }
-
-        .btn-register {
-            background: var(--neon-purple);
-            color: #fff;
-            border: 1px solid var(--neon-purple);
-        }
-
-        .btn-register:hover {
-            background: transparent;
-            color: var(--neon-purple);
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
-        }
-
-        /* --- Hero Section --- */
-        .hero {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 140px 5% 60px; /* Увеличен верхний отступ из-за фикс. хедера */
-            text-align: center;
-            position: relative;
-            width: 100%;
-        }
-
+        .hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 140px 5% 60px; text-align: center; position: relative; }
         .hero::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 600px;
-            height: 600px;
-            max-width: 90vw; /* Адаптивность градиента */
-            background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; height: 600px; max-width: 90vw; background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, transparent 70%); z-index: -1; pointer-events: none;
         }
-
         .hero-content {
-            width: 100%;
-            max-width: 900px; /* Чуть шире для контента */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 50px 40px;
-            background: rgba(10, 10, 10, 0.85); /* Чуть плотнее фон */
-            position: relative;
-            backdrop-filter: blur(5px);
+            width: 100%; max-width: 900px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 50px 40px;
+            background: rgba(10, 10, 10, 0.85); position: relative; backdrop-filter: blur(5px);
         }
-
-        /* Декоративные уголки */
-        .corner {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--neon-blue);
-            transition: all 0.5s ease;
-        }
+        .corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--neon-blue); transition: all 0.5s ease; }
         .c-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
         .c-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
         .c-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
         .c-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+        .hero-content:hover .corner { width: 30px; height: 30px; box-shadow: 0 0 10px var(--neon-blue); }
 
-        .hero-content:hover .corner {
-            width: 30px;
-            height: 30px;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
+        .status-badge { display: inline-block; padding: 6px 12px; border: 1px solid var(--neon-blue); color: var(--neon-blue); font-size: 0.8rem; margin-bottom: 25px; background: rgba(0, 243, 255, 0.05); letter-spacing: 1px; }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: 25px; line-height: 1.3; }
+        p.subtitle { font-size: clamp(0.9rem, 2vw, 1.1rem); margin-bottom: 40px; color: #aaa; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .cta-container { margin-bottom: 50px; display: flex; flex-direction: column; align-items: center; }
 
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            font-size: 0.8rem;
-            margin-bottom: 25px;
-            background: rgba(0, 243, 255, 0.05);
-            letter-spacing: 1px;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem); /* Адаптивный размер шрифта */
-            margin-bottom: 25px;
-            line-height: 1.3; /* Увеличен межстрочный интервал, чтобы текст не наезжал */
-            word-wrap: break-word; /* Предотвращает вылезание длинных слов */
-        }
-
-        p.subtitle {
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-            margin-bottom: 40px;
-            color: #aaa;
-            line-height: 1.6;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Контейнер для кнопки призыва к действию */
-        .cta-container {
-            margin-bottom: 50px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .cta-btn-wrapper {
-            display: inline-block;
-            width: auto;
-            max-width: 100%;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Увеличил minmax чтобы не плющило текст */
-            gap: 25px;
-            margin-top: 30px;
-            width: 100%;
-        }
-
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-top: 30px; width: 100%; }
         .feature-item {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px 20px;
-            text-align: left;
-            transition: 0.3s;
-            background: rgba(255,255,255,0.02);
-            height: 100%; /* Одинаковая высота карточек */
-            display: flex;
-            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px 20px; text-align: left; transition: 0.3s;
+            background: rgba(255,255,255,0.02); height: 100%; display: flex; flex-direction: column;
         }
+        .feature-item:hover { border-color: var(--neon-purple); transform: translateY(-5px); background: rgba(188, 19, 254, 0.05); }
+        .feature-icon { font-size: 1.5rem; margin-bottom: 15px; color: var(--neon-purple); }
+        .feature-item h3 { font-size: 1.1rem; margin-bottom: 10px; color: #fff; }
+        .feature-item p { font-size: 0.9rem; color: #ccc; line-height: 1.5; }
 
-        .feature-item:hover {
-            border-color: var(--neon-purple);
-            transform: translateY(-5px);
-            background: rgba(188, 19, 254, 0.05);
-        }
+        footer { border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 20px; text-align: center; font-size: 0.8rem; color: #666; background: var(--bg-dark); margin-top: auto; }
 
-        .feature-icon {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: var(--neon-purple);
-        }
-        
-        .feature-item h3 {
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-        
-        .feature-item p {
-            font-size: 0.9rem;
-            color: #ccc;
-            line-height: 1.5;
-        }
-
-        /* --- Footer --- */
-        footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #666;
-            background: var(--bg-dark); /* Фон футера, чтобы не просвечивал */
-            margin-top: auto;
-        }
-
-        /* Mobile responsive */
         @media (max-width: 768px) {
-            header {
-                padding: 15px 5%;
-            }
-            
-            .btn-group {
-                display: none; /* Для мобильных можно скрыть или сделать бургер */
-            }
-            
-            .hero {
-                padding-top: 100px;
-            }
-
-            .hero-content {
-                padding: 30px 20px;
-            }
-
-            .status-badge {
-                font-size: 0.7rem;
-            }
-
-            /* Кнопка на мобильном */
-            .btn-register {
-                width: 100%;
-                display: block;
-                text-align: center;
-            }
-            
-            .cta-btn-wrapper {
-                width: 100%;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr; /* Одна колонка на телефонах */
-            }
+            header { flex-direction: column; gap: 15px; }
+            .header-actions { width: 100%; justify-content: center; flex-wrap: wrap; }
+            .hero { padding-top: 180px; }
+            .features-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -340,72 +106,165 @@
         <div class="logo">
             <span></span> NEXUS_API
         </div>
-        <nav class="btn-group">
-            <a href="/login" class="btn btn-login" id="nav-login">/// ВХОД</a>
-            <a href="/register" class="btn btn-register">РЕГИСТРАЦИЯ_INIT</a>
-        </nav>
+        <div class="header-actions">
+            <!-- Language Selector -->
+            <select id="lang-select" class="lang-select" onchange="changeLanguage(this.value)">
+                <option value="en">EN (US)</option>
+                <option value="en-gb">EN (GB)</option>
+                <option value="ru">RU</option>
+                <option value="es">ES</option>
+            </select>
+
+            <div class="btn-group">
+                <a href="/login" class="btn btn-login" id="nav-login" data-i18n="nav_login">/// LOGIN</a>
+                <a href="/register" class="btn btn-register" data-i18n="nav_register">REGISTER_INIT</a>
+            </div>
+        </div>
     </header>
 
     <section class="hero">
         <div class="hero-content">
-            <!-- Уголки для стиля -->
-            <div class="corner c-tl"></div>
-            <div class="corner c-tr"></div>
-            <div class="corner c-bl"></div>
-            <div class="corner c-br"></div>
+            <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
 
-            <div class="status-badge">СИСТЕМА: ОНЛАЙН // ВЕРСИЯ 1.0</div>
+            <div class="status-badge" data-i18n="status_badge">SYSTEM: ONLINE // V 1.0</div>
             
-            <h1>ЕДИНЫЙ <span class="highlight-blue">API</span> ДЛЯ<br>
-            <span class="highlight-purple">ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</span></h1>
+            <h1 data-i18n="hero_title">UNIFIED <span class="highlight-blue">API</span> FOR<br><span class="highlight-purple">ARTIFICIAL INTELLIGENCE</span></h1>
             
-            <p class="subtitle">
-                Интегрируй ChatGPT, Gemini и генерацию изображений в свои проекты через один шлюз. 
-                Создавай ключи. Управляй потоками.
+            <p class="subtitle" data-i18n="hero_subtitle">
+                Integrate ChatGPT, Gemini and image generation into your projects via a single gateway. Create keys. Manage flows.
             </p>
 
             <div class="cta-container">
                 <div class="cta-btn-wrapper">
-                    <a href="/register" class="btn btn-register" style="font-size: 1.1rem; padding: 15px 30px; display: inline-block;">НАЧАТЬ БЕСПЛАТНО >></a>
+                    <a href="/register" class="btn btn-register" style="font-size: 1.1rem; padding: 15px 30px; display: inline-block;" data-i18n="cta_button">START FREE >></a>
                 </div>
-                <p style="margin-top: 15px; font-size: 0.75rem; color: var(--neon-blue); letter-spacing: 0.5px;">* 100,000 токенов начислены при регистрации</p>
+                <p style="margin-top: 15px; font-size: 0.75rem; color: var(--neon-blue); letter-spacing: 0.5px;" data-i18n="cta_note">* 100,000 tokens granted on registration</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-item">
                     <div class="feature-icon">&#10036;</div>
-                    <h3>MULTI-MODEL</h3>
-                    <p>GPT-4, Gemini, DALL-E в одном интерфейсе.</p>
+                    <h3 data-i18n="feat_1_title">MULTI-MODEL</h3>
+                    <p data-i18n="feat_1_desc">GPT-4, Gemini, DALL-E in one interface.</p>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">&#9889;</div>
-                    <h3>БЫСТРЫЙ СТАРТ</h3>
-                    <p>Получи API ключ и сделай первый запрос за 30 секунд.</p>
+                    <h3 data-i18n="feat_2_title">QUICK START</h3>
+                    <p data-i18n="feat_2_desc">Get an API key and make your first request in 30 seconds.</p>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">&#128274;</div>
-                    <h3>FREE TIER</h3>
-                    <p>100к токенов бесплатно. Никаких скрытых карт.</p>
+                    <h3 data-i18n="feat_3_title">FREE TIER</h3>
+                    <p data-i18n="feat_3_desc">100k tokens free. No hidden cards attached.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <footer>
-        <p>SYSTEM STATUS: OPERATIONAL | &copy; 2024 NEXUS API INC. | ALL RIGHTS RESERVED</p>
+        <p data-i18n="footer_text">SYSTEM STATUS: OPERATIONAL | &copy; 2024 NEXUS API INC. | ALL RIGHTS RESERVED</p>
         <p style="margin-top: 5px; font-family: 'Orbitron'; color: #333;">01001000 01001001</p>
     </footer>
 
     <script>
-        // Проверка: если пользователь уже вошел, меняем кнопку на Dashboard
+        // Check Login Status
         if(localStorage.getItem('nexus_token')) {
             const loginBtn = document.getElementById('nav-login');
-            loginBtn.innerText = "/// DASHBOARD";
+            loginBtn.setAttribute('data-i18n', 'nav_dashboard'); // Use translation key
             loginBtn.href = "/dashboard";
         }
+
+        // Translations Dictionary
+        const translations = {
+            "en": {
+                "page_title": "NEXUS API | AI Gateway",
+                "nav_login": "/// LOGIN",
+                "nav_register": "REGISTER_INIT",
+                "nav_dashboard": "/// DASHBOARD",
+                "status_badge": "SYSTEM: ONLINE // V 1.0",
+                "hero_title": "UNIFIED <span class='highlight-blue'>API</span> FOR<br><span class='highlight-purple'>ARTIFICIAL INTELLIGENCE</span>",
+                "hero_subtitle": "Integrate ChatGPT, Gemini and image generation into your projects via a single gateway. Create keys. Manage flows.",
+                "cta_button": "START FREE >>",
+                "cta_note": "* 100,000 tokens granted on registration",
+                "feat_1_title": "MULTI-MODEL",
+                "feat_1_desc": "GPT-4, Gemini, DALL-E in one interface.",
+                "feat_2_title": "QUICK START",
+                "feat_2_desc": "Get an API key and make your first request in 30 seconds.",
+                "feat_3_title": "FREE TIER",
+                "feat_3_desc": "100k tokens free. No hidden cards attached.",
+                "footer_text": "SYSTEM STATUS: OPERATIONAL | © 2024 NEXUS API INC. | ALL RIGHTS RESERVED"
+            },
+            "en-gb": {
+                "page_title": "NEXUS API | AI Gateway",
+                "nav_login": "/// LOG IN",
+                "nav_register": "REGISTER_INIT",
+                "nav_dashboard": "/// DASHBOARD",
+                "status_badge": "SYSTEM: ONLINE // V 1.0",
+                "hero_title": "UNIFIED <span class='highlight-blue'>API</span> FOR<br><span class='highlight-purple'>ARTIFICIAL INTELLIGENCE</span>",
+                "hero_subtitle": "Integrate ChatGPT, Gemini and image generation into your projects via a single gateway. Create keys. Manage flows.",
+                "cta_button": "START FREE >>",
+                "cta_note": "* 100,000 tokens granted on registration",
+                "feat_1_title": "MULTI-MODEL",
+                "feat_1_desc": "GPT-4, Gemini, DALL-E in one interface.",
+                "feat_2_title": "QUICK START",
+                "feat_2_desc": "Obtain an API key and make your first request in 30 seconds.",
+                "feat_3_title": "FREE TIER",
+                "feat_3_desc": "100k tokens free. No hidden bank cards attached.",
+                "footer_text": "SYSTEM STATUS: OPERATIONAL | © 2024 NEXUS API INC. | ALL RIGHTS RESERVED"
+            },
+            "ru": {
+                "page_title": "NEXUS API | AI Шлюз",
+                "nav_login": "/// ВХОД",
+                "nav_register": "РЕГИСТРАЦИЯ",
+                "nav_dashboard": "/// КАБИНЕТ",
+                "status_badge": "СИСТЕМА: ОНЛАЙН // ВЕРСИЯ 1.0",
+                "hero_title": "ЕДИНЫЙ <span class='highlight-blue'>API</span> ДЛЯ<br><span class='highlight-purple'>ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</span>",
+                "hero_subtitle": "Интегрируй ChatGPT, Gemini и генерацию изображений в свои проекты через один шлюз. Создавай ключи. Управляй потоками.",
+                "cta_button": "НАЧАТЬ БЕСПЛАТНО >>",
+                "cta_note": "* 100,000 токенов начислены при регистрации",
+                "feat_1_title": "МУЛЬТИ-МОДЕЛЬ",
+                "feat_1_desc": "GPT-4, Gemini, DALL-E в одном интерфейсе.",
+                "feat_2_title": "БЫСТРЫЙ СТАРТ",
+                "feat_2_desc": "Получи API ключ и сделай первый запрос за 30 секунд.",
+                "feat_3_title": "БЕСПЛАТНО",
+                "feat_3_desc": "100к токенов бесплатно. Никаких скрытых карт.",
+                "footer_text": "СТАТУС СИСТЕМЫ: АКТИВЕН | © 2024 NEXUS API INC. | ВСЕ ПРАВА ЗАЩИЩЕНЫ"
+            },
+            "es": {
+                "page_title": "NEXUS API | Pasarela IA",
+                "nav_login": "/// ACCEDER",
+                "nav_register": "REGISTRO",
+                "nav_dashboard": "/// PANEL",
+                "status_badge": "SISTEMA: EN LÍNEA // V 1.0",
+                "hero_title": "<span class='highlight-blue'>API</span> UNIFICADA PARA<br><span class='highlight-purple'>INTELIGENCIA ARTIFICIAL</span>",
+                "hero_subtitle": "Integra ChatGPT, Gemini y generación de imágenes en tus proyectos a través de una sola puerta. Crea claves. Gestiona flujos.",
+                "cta_button": "EMPEZAR GRATIS >>",
+                "cta_note": "* 100,000 tokens otorgados al registrarse",
+                "feat_1_title": "MULTI-MODELO",
+                "feat_1_desc": "GPT-4, Gemini, DALL-E en una sola interfaz.",
+                "feat_2_title": "INICIO RÁPIDO",
+                "feat_2_desc": "Obtén una clave API y realiza tu primera petición en 30 segundos.",
+                "feat_3_title": "NIVEL GRATUITO",
+                "feat_3_desc": "100k tokens gratis. Sin tarjetas ocultas.",
+                "footer_text": "ESTADO DEL SISTEMA: OPERATIVO | © 2024 NEXUS API INC. | TODOS LOS DERECHOS RESERVADOS"
+            }
+        };
+
+        // Language Logic
+        function changeLanguage(lang) {
+            localStorage.setItem('nexus_lang', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+        }
+
+        // Init Language
+        const savedLang = localStorage.getItem('nexus_lang') || 'en';
+        document.getElementById('lang-select').value = savedLang;
+        changeLanguage(savedLang);
     </script>
 </body>
-
 </html>
-
-
