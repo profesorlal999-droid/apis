@@ -1247,6 +1247,10 @@ async def run_gpt_image(
             headers=headers,
             json=json_data,
         )
+        if response.status_code != 200:
+            print(f"DEBUG ERROR [Prepare]: Status {response.status_code}")
+            print(f"Response Body: {response.text[:500]}") # Выведет первые 500 символов ошибки
+            raise HTTPException(status_code=response.status_code, detail=f"Target API Error: {response.text[:100]}")
 
         conduit_token = response.json()['conduit_token']
 
