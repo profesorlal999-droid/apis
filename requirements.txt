@@ -11,3 +11,4 @@ httpx
 pydantic
 python-multipart
 email-validator
+curl_cffi==0.7.4
