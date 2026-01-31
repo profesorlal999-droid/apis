@@ -7,7 +7,7 @@ from typing import List, Optional
 from contextlib import asynccontextmanager
 from curl_cffi import requests 
 from dotenv import load_dotenv
-import requests
+
 import re
 import codecs
 from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, status, Header, Request
@@ -1445,4 +1445,5 @@ async def run_gpt_image_get(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
