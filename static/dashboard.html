@@ -165,7 +165,6 @@
                 <button class="sub-tab-btn" onclick="showDocSection('gemini', this)">GEMINI (TEXT)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('imagen', this)">IMAGEN (VISION)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('autodraw', this)">AUTODRAW (MAGIC)</button>
-                <button class="sub-tab-btn" onclick="showDocSection('gpt-image', this)">GPT (IMAGE)</button> 
             </div>
 
             <!-- AutoDraw Documentation -->
@@ -417,88 +416,11 @@ async function recognize() {
                 </div>
             </div>
 
-<!-- GPT Image Documentation (NEW) -->
-            <div id="doc-gpt-image" class="doc-container">
-                <p data-i18n="doc_gpt_img_desc">Generate high-quality images using the GPT-5-2 vision model. Returns binary JPEG data.</p>
-                <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/gpt-image</code></p>
-                <p><strong>Method:</strong> <code style="color: var(--neon-purple);">POST</code> (Recommended) / <code style="color: var(--neon-blue);">GET</code></p>
-
-                <div class="code-block">
-                    <h3>Python Integration</h3>
-                    <pre>
-import requests
-
-url = "https://nexus-api-2026.vercel.app/api/run/gpt-image"
-
-# POST Request (Recommended)
-payload = {
-    "key": "sk-nx-XXXXXXXXXXXXXXXX",
-    "prompt": "A futuristic cyberpunk city with neon lights, rain, high detail"
-}
-
-# Returns binary image data (JPEG)
-response = requests.post(url, json=payload)
-
-if response.status_code == 200:
-    # Save the image to a file
-    with open("generated_image.jpg", "wb") as f:
-        f.write(response.content)
-    print("Image saved as generated_image.jpg")
-else:
-    print("Error:", response.text)</pre>
-                </div>
-
-                <div class="code-block">
-                    <h3>JavaScript (Fetch)</h3>
-                    <pre>
-const url = "https://nexus-api-2026.vercel.app/api/run/gpt-image";
-const apiKey = "sk-nx-XXXXXXXXXXXXXXXX";
-
-async function generateImage() {
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            key: apiKey,
-            prompt: "A cute cat astronaut floating in space"
-        })
-    });
-
-    if (response.ok) {
-        // Convert binary response to a Blob
-        const blob = await response.blob();
-        // Create an object URL to display in an &lt;img&gt; tag
-        const imgUrl = URL.createObjectURL(blob);
-        
-        // Example: displaying it
-        const img = document.createElement('img');
-        img.src = imgUrl;
-        document.body.appendChild(img);
-    } else {
-        console.error("Error generating image");
-    }
-}
-
-generateImage();</pre>
-                </div>
-
-                <div class="code-block">
-                    <h3 data-i18n="doc_direct_link_title">Direct Link (Browser)</h3>
-                    <p style="color:#666; font-size: 0.9rem;" data-i18n="doc_direct_link_desc">You can simply paste this URL into your browser to generate and view an image.</p>
-                    <pre>
-https://nexus-api-2026.vercel.app/api/run/gpt-image?key=sk-nx-YOUR_KEY&prompt=A+beautiful+sunset+over+mountains</pre>
-                </div>
-            </div>
-
-        </div>
-
-<!-- Gemini Documentation (CORRECTED) -->
+            <!-- Gemini Documentation -->
             <div id="doc-gemini" class="doc-container">
                 <p data-i18n="doc_gem_desc">Access Google's Gemini Pro model via our reverse-engineered API.</p>
-                
                 <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/gemini</code></p>
                 <p><strong>Method:</strong> <code style="color: var(--neon-blue);">GET</code></p>
-
 
                 <div class="code-block">
                     <h3>Python Integration</h3>
@@ -509,55 +431,28 @@ url = "https://nexus-api-2026.vercel.app/api/run/gemini"
 
 params = {
     "key": "sk-nx-XXXXXXXXXXXXXXXX",
-    "prompt": "Explain string theory in one sentence."
+    "prompt": "Explain quantum mechanics in simple terms"
 }
 
-try:
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        print("Response:", response.text)
-    else:
-        print("Error:", response.status_code)
-except Exception as e:
-    print(e)</pre>
+response = requests.get(url, params=params)
+print(response.text)</pre>
                 </div>
 
                 <div class="code-block">
                     <h3>JavaScript (Fetch)</h3>
                     <pre>
 const apiKey = "sk-nx-XXXXXXXXXXXXXXXX";
-const userPrompt = "Write a hello world function in C++";
+const url = `https://nexus-api-2026.vercel.app/api/run/gemini?key=${apiKey}&prompt=Write a haiku`;
 
-const url = new URL("https://nexus-api-2026.vercel.app/api/run/gemini");
-url.search = new URLSearchParams({
-    key: apiKey,
-    prompt: userPrompt
-});
-
-async function askGemini() {
-    try {
-        const res = await fetch(url);
-        if(!res.ok) throw new Error("API Error");
-        
-        const text = await res.text();
-        console.log("Gemini says:", text);
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-askGemini();</pre>
-                </div>
-
-                <div class="code-block">
-                    <h3>Direct URL Example</h3>
-                    <pre>
-https://nexus-api-2026.vercel.app/api/run/gemini?key=YOUR_KEY&prompt=Hello</pre>
+fetch(url)
+  .then(res => res.text()) // Gemini returns raw text string
+  .then(text => console.log(text))
+  .catch(err => console.error(err));</pre>
                 </div>
             </div>
 
+        </div>
     </div>
-
     
 
     <!-- Modal Create Key -->
@@ -581,7 +476,6 @@ https://nexus-api-2026.vercel.app/api/run/gemini?key=YOUR_KEY&prompt=Hello</pre>
 
     <script>
         // --- TRANSLATIONS LOGIC ---
-        // --- TRANSLATIONS LOGIC ---
         const translations = {
             "en": {
                 "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOGOUT",
@@ -596,11 +490,6 @@ https://nexus-api-2026.vercel.app/api/run/gemini?key=YOUR_KEY&prompt=Hello</pre>
                 "doc_im_desc": "Send sketch data to recognize objects using our Imagen recognition model.",
                 "doc_im_client": "Client-Side Integration (Drawing Canvas)",
                 "doc_gem_desc": "Access Google's Gemini Pro model via our reverse-engineered API.",
-                // GPT IMAGE KEYS (EN)
-                "doc_gpt_img_desc": "Generate high-quality images using the GPT-5-2 vision model. Returns binary JPEG data.",
-                "doc_direct_link_title": "Direct Link (Browser)",
-                "doc_direct_link_desc": "You can simply paste this URL into your browser to generate and view an image.",
-                
                 "m_h_new": "GENERATE NEW KEY", "m_lbl_name": "Key Name", "m_lbl_limit": "Token Limit", "btn_cancel": "CANCEL", "btn_create": "CREATE",
                 "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR"
             },
@@ -617,11 +506,6 @@ https://nexus-api-2026.vercel.app/api/run/gemini?key=YOUR_KEY&prompt=Hello</pre>
                 "doc_im_desc": "Send sketch data to recognise objects using our Imagen recognition model.",
                 "doc_im_client": "Client-Side Integration (Drawing Canvas)",
                 "doc_gem_desc": "Access Google's Gemini Pro model via our reverse-engineered API.",
-                // GPT IMAGE KEYS (EN-GB)
-                "doc_gpt_img_desc": "Generate high-quality images using the GPT-5-2 vision model. Returns binary JPEG data.",
-                "doc_direct_link_title": "Direct Link (Browser)",
-                "doc_direct_link_desc": "You can simply paste this URL into your browser to generate and view an image.",
-
                 "m_h_new": "GENERATE NEW KEY", "m_lbl_name": "Key Name", "m_lbl_limit": "Token Limit", "btn_cancel": "CANCEL", "btn_create": "CREATE",
                 "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR"
             },
@@ -638,11 +522,6 @@ https://nexus-api-2026.vercel.app/api/run/gemini?key=YOUR_KEY&prompt=Hello</pre>
                 "doc_im_desc": "Отправка скетчей для распознавания объектов моделью Imagen.",
                 "doc_im_client": "Интеграция на клиенте (Canvas)",
                 "doc_gem_desc": "Доступ к модели Google Gemini Pro через наш API.",
-                // GPT IMAGE KEYS (RU)
-                "doc_gpt_img_desc": "Генерация высококачественных изображений с помощью модели GPT-5-2 vision. Возвращает JPEG данные.",
-                "doc_direct_link_title": "Прямая ссылка (Браузер)",
-                "doc_direct_link_desc": "Вы можете просто вставить этот URL в браузер для генерации и просмотра изображения.",
-
                 "m_h_new": "СОЗДАТЬ НОВЫЙ КЛЮЧ", "m_lbl_name": "Название ключа", "m_lbl_limit": "Лимит токенов", "btn_cancel": "ОТМЕНА", "btn_create": "СОЗДАТЬ",
                 "err_fields": "ВСЕ ПОЛЯ ОБЯЗАТЕЛЬНЫ", "err_limit": "ЛИМИТ ПРЕВЫШАЕТ БАЛАНС", "err_sys": "СИСТЕМНАЯ ОШИБКА"
             },
@@ -659,11 +538,6 @@ https://nexus-api-2026.vercel.app/api/run/gemini?key=YOUR_KEY&prompt=Hello</pre>
                 "doc_im_desc": "Envía bocetos para reconocer objetos con Imagen.",
                 "doc_im_client": "Integración Cliente (Canvas)",
                 "doc_gem_desc": "Acceso al modelo Google Gemini Pro vía API.",
-                // GPT IMAGE KEYS (ES)
-                "doc_gpt_img_desc": "Genera imágenes de alta calidad usando el modelo GPT-5-2 vision. Devuelve datos JPEG.",
-                "doc_direct_link_title": "Enlace Directo (Navegador)",
-                "doc_direct_link_desc": "Simplemente pega esta URL en tu navegador para generar y ver una imagen.",
-
                 "m_h_new": "GENERAR CLAVE", "m_lbl_name": "Nombre Clave", "m_lbl_limit": "Límite Tokens", "btn_cancel": "CANCELAR", "btn_create": "CREAR",
                 "err_fields": "CAMPOS REQUERIDOS", "err_limit": "LÍMITE EXCEDE BALANCE", "err_sys": "ERROR DEL SISTEMA"
             }
