@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,9 +25,18 @@
             display: flex; flex-direction: column; padding: 20px;
         }
         .logo { 
-            font-family: 'Orbitron'; color: var(--neon-blue); font-size: 1.5rem; margin-bottom: 40px; 
+            font-family: 'Orbitron'; color: var(--neon-blue); font-size: 1.5rem; margin-bottom: 20px; 
             text-shadow: 0 0 10px rgba(0,243,255,0.3);
         }
+        
+        /* Language Selector in Sidebar */
+        .lang-container { margin-bottom: 20px; }
+        .lang-select {
+            width: 100%; background: #000; color: #aaa; border: 1px solid #333; 
+            padding: 5px; font-family: 'Roboto Mono'; cursor: pointer; outline: none;
+        }
+        .lang-select:hover { border-color: var(--neon-blue); color: #fff; }
+
         .user-balance {
             background: rgba(0,243,255,0.1); border: 1px solid var(--neon-blue);
             padding: 15px; margin-bottom: 30px; text-align: center;
@@ -38,12 +47,12 @@
         .nav-btn {
             background: transparent; border: none; color: #888; text-align: left;
             padding: 15px; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s;
-            border-left: 2px solid transparent; margin-bottom: 5px;
+            border-left: 2px solid transparent; margin-bottom: 5px; width: 100%;
         }
         .nav-btn:hover, .nav-btn.active {
             color: var(--neon-blue); background: rgba(255,255,255,0.03); border-left-color: var(--neon-blue);
         }
-        .logout { margin-top: auto; color: #f00; }
+        .logout { margin-top: auto; color: #f44; }
 
         /* Main Content */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
@@ -100,13 +109,24 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">NEXUS_API</div>
+        
+        <!-- Language Selector -->
+        <div class="lang-container">
+            <select id="lang-select" class="lang-select" onchange="changeLanguage(this.value)">
+                <option value="en">EN (US)</option>
+                <option value="en-gb">EN (UK)</option>
+                <option value="ru">RU</option>
+                <option value="es">ES</option>
+            </select>
+        </div>
+
         <div class="user-balance">
-            <h3>GLOBAL BALANCE</h3>
+            <h3 data-i18n="bal_title">GLOBAL BALANCE</h3>
             <span id="balance-display">---</span>
         </div>
-        <button class="nav-btn active" onclick="showTab('keys')">API KEYS</button>
-        <button class="nav-btn" onclick="showTab('docs')">DOCUMENTATION</button>
-        <button class="nav-btn logout" onclick="logout()">LOGOUT</button>
+        <button class="nav-btn active" onclick="showTab('keys')" data-i18n="nav_keys">API KEYS</button>
+        <button class="nav-btn" onclick="showTab('docs')" data-i18n="nav_docs">DOCUMENTATION</button>
+        <button class="nav-btn logout" onclick="logout()" data-i18n="nav_logout">LOGOUT</button>
     </div>
 
     <!-- Main -->
@@ -114,17 +134,17 @@
         
         <!-- Tab: API Keys -->
         <div id="tab-keys" class="section active">
-            <h2>API KEYS MANAGEMENT</h2>
-            <p style="color:#666; font-size: 0.9rem;">Create up to 5 keys. Limits cannot exceed your global balance.</p>
+            <h2 data-i18n="h_keys">API KEYS MANAGEMENT</h2>
+            <p style="color:#666; font-size: 0.9rem;" data-i18n="txt_keys_desc">Create up to 5 keys. Limits cannot exceed your global balance.</p>
             
             <table class="keys-table">
                 <thead>
                     <tr>
-                        <th>NAME</th>
-                        <th>KEY</th>
-                        <th>LIMIT</th>
-                        <th>CREATED</th>
-                        <th>ACTION</th>
+                        <th data-i18n="th_name">NAME</th>
+                        <th data-i18n="th_key">KEY</th>
+                        <th data-i18n="th_limit">LIMIT</th>
+                        <th data-i18n="th_created">CREATED</th>
+                        <th data-i18n="th_action">ACTION</th>
                     </tr>
                 </thead>
                 <tbody id="keys-list">
@@ -132,12 +152,12 @@
                 </tbody>
             </table>
 
-            <button class="btn-create" onclick="openModal()">+ CREATE NEW KEY</button>
+            <button class="btn-create" onclick="openModal()" data-i18n="btn_create_key">+ CREATE NEW KEY</button>
         </div>
 
         <!-- Tab: Documentation -->
         <div id="tab-docs" class="section">
-            <h2>DEVELOPER DOCUMENTATION</h2>
+            <h2 data-i18n="h_docs">DEVELOPER DOCUMENTATION</h2>
             
             <!-- Sub Navigation for Models -->
             <div class="sub-nav">
@@ -146,16 +166,17 @@
                 <button class="sub-tab-btn" onclick="showDocSection('imagen', this)">IMAGEN (VISION)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('autodraw', this)">AUTODRAW (MAGIC)</button>
             </div>
-<!-- AutoDraw Documentation -->
-<div id="doc-autodraw" class="doc-container">
-    <p>Intelligent sketch completion. Draws standard icons based on your rough strokes.</p>
-    <p><strong>Step 1: Predict</strong> <code style="color: var(--neon-purple);">POST /api/run/autodraw/predict</code></p>
-    <p><strong>Step 2: Get Icon</strong> <code style="color: var(--neon-blue);">GET /api/run/autodraw/icon</code></p>
 
-    <div class="code-block">
-        <h3>Interactive Example</h3>
-        <p>Copy this code to implement the full AutoDraw flow:</p>
-        <pre>
+            <!-- AutoDraw Documentation -->
+            <div id="doc-autodraw" class="doc-container">
+                <p data-i18n="doc_ad_desc">Intelligent sketch completion. Draws standard icons based on your rough strokes.</p>
+                <p><strong>Step 1: Predict</strong> <code style="color: var(--neon-purple);">POST /api/run/autodraw/predict</code></p>
+                <p><strong>Step 2: Get Icon</strong> <code style="color: var(--neon-blue);">GET /api/run/autodraw/icon</code></p>
+
+                <div class="code-block">
+                    <h3 data-i18n="doc_ex_interactive">Interactive Example</h3>
+                    <p data-i18n="doc_ex_desc">Copy this code to implement the full AutoDraw flow:</p>
+                    <pre>
 &lt;!-- HTML --&gt;
 &lt;div style="display:flex; gap:10px;"&gt;
     &lt;canvas id="adCanvas" width="400" height="300" style="border:1px solid #333; background:#fff; cursor:crosshair;"&gt;&lt;/canvas&gt;
@@ -263,11 +284,12 @@ async function fetchAndDrawIcon(name) {
     }
 }
 &lt;/script&gt;</pre>
-    </div>
-</div>
+                </div>
+            </div>
+
             <!-- GPT Documentation -->
             <div id="doc-gpt" class="doc-container active">
-                <p>Interact with our advanced language models using simple HTTP requests.</p>
+                <p data-i18n="doc_gpt_desc">Interact with our advanced language models using simple HTTP requests.</p>
                 <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/gpt</code></p>
                 <p><strong>Method:</strong> <code style="color: var(--neon-blue);">GET</code></p>
 
@@ -320,12 +342,12 @@ curl "https://nexus-api-2026.vercel.app/api/run/gpt?key=sk-nx-XXX&model=auto&pro
 
             <!-- Imagen Documentation -->
             <div id="doc-imagen" class="doc-container">
-                <p>Send sketch data to recognize objects using our Imagen recognition model.</p>
+                <p data-i18n="doc_im_desc">Send sketch data to recognize objects using our Imagen recognition model.</p>
                 <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/draw</code></p>
                 <p><strong>Method:</strong> <code style="color: var(--neon-purple);">POST</code></p>
 
                 <div class="code-block">
-                    <h3>Client-Side Integration (Drawing Canvas)</h3>
+                    <h3 data-i18n="doc_im_client">Client-Side Integration (Drawing Canvas)</h3>
                     <p>Copy this code to create a drawing canvas on your site:</p>
                     <pre>
 &lt;!-- HTML Structure --&gt;
@@ -394,9 +416,9 @@ async function recognize() {
                 </div>
             </div>
 
-<!-- Gemini Documentation -->
+            <!-- Gemini Documentation -->
             <div id="doc-gemini" class="doc-container">
-                <p>Access Google's Gemini Pro model via our reverse-engineered API.</p>
+                <p data-i18n="doc_gem_desc">Access Google's Gemini Pro model via our reverse-engineered API.</p>
                 <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/gemini</code></p>
                 <p><strong>Method:</strong> <code style="color: var(--neon-blue);">GET</code></p>
 
@@ -429,7 +451,6 @@ fetch(url)
                 </div>
             </div>
 
-
         </div>
     </div>
     
@@ -437,23 +458,112 @@ fetch(url)
     <!-- Modal Create Key -->
     <div id="create-modal" class="modal-overlay">
         <div class="modal">
-            <h3 style="color:var(--neon-blue); margin-top:0;">GENERATE NEW KEY</h3>
-            <label>Key Name</label>
+            <h3 style="color:var(--neon-blue); margin-top:0;" data-i18n="m_h_new">GENERATE NEW KEY</h3>
+            <label data-i18n="m_lbl_name">Key Name</label>
             <input type="text" id="k-name" placeholder="e.g. Production App">
             
-            <label>Token Limit (Max: <span id="modal-max-limit">0</span>)</label>
+            <label><span data-i18n="m_lbl_limit">Token Limit</span> (Max: <span id="modal-max-limit">0</span>)</label>
             <input type="number" id="k-limit" placeholder="1000">
             
             <p id="modal-error" style="color: #f44; font-size: 0.8rem;"></p>
 
             <div class="modal-actions">
-                <button class="nav-btn" onclick="closeModal()">CANCEL</button>
-                <button class="btn-create" style="margin:0;" onclick="submitKey()">CREATE</button>
+                <button class="nav-btn" onclick="closeModal()" style="width:auto;" data-i18n="btn_cancel">CANCEL</button>
+                <button class="btn-create" style="margin:0;" onclick="submitKey()" data-i18n="btn_create">CREATE</button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- TRANSLATIONS LOGIC ---
+        const translations = {
+            "en": {
+                "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOGOUT",
+                "h_keys": "API KEYS MANAGEMENT", "txt_keys_desc": "Create up to 5 keys. Limits cannot exceed your global balance.",
+                "th_name": "NAME", "th_key": "KEY", "th_limit": "LIMIT", "th_created": "CREATED", "th_action": "ACTION",
+                "btn_create_key": "+ CREATE NEW KEY", "btn_revoke": "REVOKE", 
+                "h_docs": "DEVELOPER DOCUMENTATION",
+                "doc_ad_desc": "Intelligent sketch completion. Draws standard icons based on your rough strokes.",
+                "doc_ex_interactive": "Interactive Example",
+                "doc_ex_desc": "Copy this code to implement the full AutoDraw flow:",
+                "doc_gpt_desc": "Interact with our advanced language models using simple HTTP requests.",
+                "doc_im_desc": "Send sketch data to recognize objects using our Imagen recognition model.",
+                "doc_im_client": "Client-Side Integration (Drawing Canvas)",
+                "doc_gem_desc": "Access Google's Gemini Pro model via our reverse-engineered API.",
+                "m_h_new": "GENERATE NEW KEY", "m_lbl_name": "Key Name", "m_lbl_limit": "Token Limit", "btn_cancel": "CANCEL", "btn_create": "CREATE",
+                "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR"
+            },
+            "en-gb": {
+                "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOG OUT",
+                "h_keys": "API KEYS MANAGEMENT", "txt_keys_desc": "Create up to 5 keys. Limits cannot exceed your global balance.",
+                "th_name": "NAME", "th_key": "KEY", "th_limit": "LIMIT", "th_created": "CREATED", "th_action": "ACTION",
+                "btn_create_key": "+ CREATE NEW KEY", "btn_revoke": "REVOKE",
+                "h_docs": "DEVELOPER DOCUMENTATION",
+                "doc_ad_desc": "Intelligent sketch completion. Draws standard icons based on your rough strokes.",
+                "doc_ex_interactive": "Interactive Example",
+                "doc_ex_desc": "Copy this code to implement the full AutoDraw flow:",
+                "doc_gpt_desc": "Interact with our advanced language models using simple HTTP requests.",
+                "doc_im_desc": "Send sketch data to recognise objects using our Imagen recognition model.",
+                "doc_im_client": "Client-Side Integration (Drawing Canvas)",
+                "doc_gem_desc": "Access Google's Gemini Pro model via our reverse-engineered API.",
+                "m_h_new": "GENERATE NEW KEY", "m_lbl_name": "Key Name", "m_lbl_limit": "Token Limit", "btn_cancel": "CANCEL", "btn_create": "CREATE",
+                "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR"
+            },
+            "ru": {
+                "bal_title": "ОБЩИЙ БАЛАНС", "nav_keys": "API КЛЮЧИ", "nav_docs": "ДОКУМЕНТАЦИЯ", "nav_logout": "ВЫХОД",
+                "h_keys": "УПРАВЛЕНИЕ КЛЮЧАМИ", "txt_keys_desc": "Создайте до 5 ключей. Лимиты не могут превышать общий баланс.",
+                "th_name": "ИМЯ", "th_key": "КЛЮЧ", "th_limit": "ЛИМИТ", "th_created": "СОЗДАН", "th_action": "ДЕЙСТВИЕ",
+                "btn_create_key": "+ СОЗДАТЬ КЛЮЧ", "btn_revoke": "УДАЛИТЬ",
+                "h_docs": "ДОКУМЕНТАЦИЯ",
+                "doc_ad_desc": "Умное автодополнение скетчей. Рисует стандартные иконки по вашим наброскам.",
+                "doc_ex_interactive": "Интерактивный Пример",
+                "doc_ex_desc": "Скопируйте этот код для внедрения AutoDraw:",
+                "doc_gpt_desc": "Взаимодействие с языковыми моделями через HTTP запросы.",
+                "doc_im_desc": "Отправка скетчей для распознавания объектов моделью Imagen.",
+                "doc_im_client": "Интеграция на клиенте (Canvas)",
+                "doc_gem_desc": "Доступ к модели Google Gemini Pro через наш API.",
+                "m_h_new": "СОЗДАТЬ НОВЫЙ КЛЮЧ", "m_lbl_name": "Название ключа", "m_lbl_limit": "Лимит токенов", "btn_cancel": "ОТМЕНА", "btn_create": "СОЗДАТЬ",
+                "err_fields": "ВСЕ ПОЛЯ ОБЯЗАТЕЛЬНЫ", "err_limit": "ЛИМИТ ПРЕВЫШАЕТ БАЛАНС", "err_sys": "СИСТЕМНАЯ ОШИБКА"
+            },
+            "es": {
+                "bal_title": "BALANCE GLOBAL", "nav_keys": "CLAVES API", "nav_docs": "DOCUMENTACIÓN", "nav_logout": "SALIR",
+                "h_keys": "GESTIÓN DE CLAVES", "txt_keys_desc": "Crea hasta 5 claves. Los límites no pueden exceder tu balance.",
+                "th_name": "NOMBRE", "th_key": "CLAVE", "th_limit": "LÍMITE", "th_created": "CREADA", "th_action": "ACCIÓN",
+                "btn_create_key": "+ NUEVA CLAVE", "btn_revoke": "REVOCAR",
+                "h_docs": "DOCUMENTACIÓN",
+                "doc_ad_desc": "Completado inteligente de bocetos. Dibuja iconos basados en trazos.",
+                "doc_ex_interactive": "Ejemplo Interactivo",
+                "doc_ex_desc": "Copia este código para implementar AutoDraw:",
+                "doc_gpt_desc": "Interactúa con modelos de lenguaje avanzados vía HTTP.",
+                "doc_im_desc": "Envía bocetos para reconocer objetos con Imagen.",
+                "doc_im_client": "Integración Cliente (Canvas)",
+                "doc_gem_desc": "Acceso al modelo Google Gemini Pro vía API.",
+                "m_h_new": "GENERAR CLAVE", "m_lbl_name": "Nombre Clave", "m_lbl_limit": "Límite Tokens", "btn_cancel": "CANCELAR", "btn_create": "CREAR",
+                "err_fields": "CAMPOS REQUERIDOS", "err_limit": "LÍMITE EXCEDE BALANCE", "err_sys": "ERROR DEL SISTEMA"
+            }
+        };
+
+        function changeLanguage(lang) {
+            localStorage.setItem('nexus_lang', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
+            });
+            fetchKeys(); // Перерисовать таблицу с новыми текстами кнопок
+        }
+
+        const savedLang = localStorage.getItem('nexus_lang') || 'en';
+        document.getElementById('lang-select').value = savedLang;
+        changeLanguage(savedLang);
+
+        function getMsg(key) {
+            const l = localStorage.getItem('nexus_lang') || 'en';
+            return translations[l][key] || key;
+        }
+
+        // --- CORE APP LOGIC ---
         const API_URL = "https://nexus-api-2026.vercel.app"; 
         let currentBalance = 0;
 
@@ -473,7 +583,7 @@ fetch(url)
 
         async function fetchUserData() {
             try {
-                const res = await fetch('https://nexus-api-2026.vercel.app/api/user/me', { headers });
+                const res = await fetch('/api/user/me', { headers });
                 if(res.status === 401) logout();
                 const data = await res.json();
                 currentBalance = data.balance;
@@ -487,7 +597,7 @@ fetch(url)
             list.innerHTML = '<tr><td colspan="5" style="text-align:center">LOADING...</td></tr>';
             
             try {
-                const res = await fetch('https://nexus-api-2026.vercel.app/api/keys', { headers });
+                const res = await fetch('/api/keys', { headers });
                 const keys = await res.json();
                 
                 list.innerHTML = '';
@@ -496,6 +606,10 @@ fetch(url)
                     return;
                 }
 
+                // Get current language for button text
+                const lang = localStorage.getItem('nexus_lang') || 'en';
+                const revokeTxt = translations[lang]['btn_revoke'] || 'REVOKE';
+
                 keys.forEach(k => {
                     const row = `
                         <tr>
@@ -503,7 +617,7 @@ fetch(url)
                             <td><span class="key-code">${k.key}</span></td>
                             <td>${k.limit.toLocaleString()}</td>
                             <td style="color:#666; font-size:0.8rem;">${new Date(k.created_at).toLocaleDateString()}</td>
-                            <td><button class="btn-delete" onclick="deleteKey(${k.id})">REVOKE</button></td>
+                            <td><button class="btn-delete" onclick="deleteKey(${k.id})">${revokeTxt}</button></td>
                         </tr>
                     `;
                     list.innerHTML += row;
@@ -517,16 +631,16 @@ fetch(url)
             const errBox = document.getElementById('modal-error');
 
             if(!name || !limit) {
-                errBox.innerText = "ALL FIELDS REQUIRED";
+                errBox.innerText = getMsg("err_fields");
                 return;
             }
             if(limit > currentBalance) {
-                errBox.innerText = "LIMIT EXCEEDS GLOBAL BALANCE";
+                errBox.innerText = getMsg("err_limit");
                 return;
             }
 
             try {
-                const res = await fetch('https://nexus-api-2026.vercel.app/api/keys', {
+                const res = await fetch('/api/keys', {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({ name, limit })
@@ -539,12 +653,12 @@ fetch(url)
                     closeModal();
                     fetchKeys();
                 }
-            } catch(e) { errBox.innerText = "SYSTEM ERROR"; }
+            } catch(e) { errBox.innerText = getMsg("err_sys"); }
         }
 
         async function deleteKey(id) {
-            if(!confirm("REVOKE THIS KEY? ACTION IRREVERSIBLE.")) return;
-            await fetch(`https://nexus-api-2026.vercel.app/api/keys/${id}`, { method: 'DELETE', headers });
+            if(!confirm("CONFIRM?")) return;
+            await fetch(`/api/keys/${id}`, { method: 'DELETE', headers });
             fetchKeys();
         }
 
@@ -553,17 +667,12 @@ fetch(url)
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
-            event.target.classList.add('active');
+            if(window.event) window.event.currentTarget.classList.add('active');
         }
 
-        // Documentation Tabs Logic
         function showDocSection(docId, btnElement) {
-            // Hide all doc containers
             document.querySelectorAll('.doc-container').forEach(el => el.classList.remove('active'));
-            // Remove active state from all buttons
             document.querySelectorAll('.sub-tab-btn').forEach(el => el.classList.remove('active'));
-            
-            // Activate selected
             document.getElementById('doc-' + docId).classList.add('active');
             btnElement.classList.add('active');
         }
@@ -582,4 +691,3 @@ fetch(url)
     </script>
 </body>
 </html>
-
