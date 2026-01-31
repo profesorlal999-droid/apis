@@ -24,6 +24,8 @@ import httpx
 import json
 import urllib.parse
 import pickle
+
+from fastapi import Response # Добавьте в начало файла
 from sqlalchemy import LargeBinary # Добавить к импортам sqlalchemy
 # Остальные импорты уже есть, убедись что requests и json импортированы
 # --- КОНФИГУРАЦИЯ ---
@@ -99,7 +101,9 @@ class Token(BaseModel):
 class KeyCreate(BaseModel):
     name: str
     limit: int
-
+class GPTImageRequest(BaseModel):
+    key: str
+    prompt: str
 class KeyResponse(BaseModel):
     id: int
     name: str
@@ -1156,52 +1160,282 @@ async def run_gemini(
 
     return ai_response
 
-@app.get("/sitemap.xml", include_in_schema=False)
-async def get_sitemap():
-    # Укажите здесь ваш реальный домен без слеша в конце
-    base_url = "https://nexus-api-2026.vercel.app"
+@app.post("/api/run/gpt-image")
+async def run_gpt_image(
+    req: GPTImageRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    # 1. Проверка ключа и баланса
+    stmt = select(APIKey).where(APIKey.key_hash == req.key)
+    result = await db.execute(stmt)
+    api_key_obj = result.scalar_one_or_none()
+
+    if not api_key_obj:
+        raise HTTPException(status_code=403, detail="INVALID API KEY")
+
+    user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
+    user = user_result.scalar_one_or_none()
     
-    # Список страниц, которые вы хотите, чтобы Google нашел
-    # Не добавляйте сюда /dashboard (так как он закрыт паролем) и /api/...
-    pages = [
-        "/",           # Главная страница
-        "/login",      # Страница входа
-        "/register",   # Страница регистрации
-    ]
-    
-    sitemap_xml = ['<?xml version="1.0" encoding="UTF-8"?>']
-    sitemap_xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
-    
-    for page in pages:
-        sitemap_xml.append('<url>')
-        sitemap_xml.append(f'  <loc>{base_url}{page}</loc>')
-        sitemap_xml.append('  <changefreq>daily</changefreq>') # Как часто меняется
-        sitemap_xml.append('  <priority>0.8</priority>')       # Приоритет (0.0 - 1.0)
-        sitemap_xml.append('</url>')
+    COST = 3000 
+    if not user or user.tokens_balance < COST or api_key_obj.limit_tokens < COST:
+        raise HTTPException(status_code=402, detail="INSUFFICIENT FUNDS")
+
+    try:
+        # ==========================================
+        # НАЧАЛО ТВОЕГО КОДА (ТОЧЬ-В-ТОЧЬ)
+        # ==========================================
+        import requests
+
+        # --- 1. PREPARE ---
+        cookies = {
+            '_ga': 'GA1.1.1379913415.1767064677',
+            'gfsessionid': '3vpn450b3s4zj0dg2joermikyaguhz18',
+            '_account': 'eff23844-b9f4-437a-901c-a547119353a9',
+            'oai-last-model-config': '%7B%22model%22%3A%22gpt-5-2-pro%22%7D',
+            'oai-nav-state': '1',
+            'oai-client-auth-info': '%7B%22user%22%3A%7B%22name%22%3A%22lzilnRqE%7C%22%2C%22email%22%3A%22lzilnRqE%7C%22%2C%22picture%22%3A%22%2Favatars.png%22%2C%22connectionType%22%3A2%2C%22timestamp%22%3A1769841830434%7D%2C%22isOptedOut%22%3Afalse%7D',
+            '_ga_9SHBSK2D9J': 'GS2.1.s1769841202$o30$g1$t1769842895$j34$l0$h0',
+            'cf_clearance': 'jJyWmg.xPbR6ZmoGFl0v0KyoeCx6si2mYk9XN3mvYWg-1769846486-1.2.1.1-khh70TMg1fk53kH2NmA9j3lIYIwLcjLuiYDx3bgShaXvIyvUICXq_3poDmlQzLrg7kmbGpk5znKCocouCu0hsVxM1wb6YOrQfvume8H14t4GyXM3rcplQTaSKG8ghdxMCWuNz7XS8y.VCaVqUO4zcnokQ05PoYuzG4ifcJL5hTpOa.tm.wRvyV50N5ZBmidB6e72V8d_qSZ89tC9mVTGQP75lZp9C1HtMJ3xAf8yqgM',
+            '_dd_s': 'aid=a58c92c5-f6c4-4d39-971b-6cee1f56ab45&logs=1&id=f346f767-f50a-405b-b0dc-97186e90cd7b&created=1769841098870&expire=1769843798274',
+        }
+
+        headers = {
+            'accept': '*/*',
+            'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+            'authorization': 'Bearer profesorlal3',
+            'chatgpt-account-id': 'eff23844-b9f4-437a-901c-a547119353a9',
+            'content-type': 'application/json',
+            'oai-client-version': 'prod-9f5aa1f7b48d4577791d0e660bac1111ba132ee6',
+            'oai-device-id': '4ad0bfd2-9b70-447e-b154-a54edb0e1e4e',
+            'oai-language': 'ru-RU',
+            'origin': 'https://chat.chatgptplus.cn',
+            'priority': 'u=1, i',
+            'referer': 'https://chat.chatgptplus.cn/',
+            'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
+            'sec-ch-ua-arch': '"x86"',
+            'sec-ch-ua-bitness': '"64"',
+            'sec-ch-ua-full-version': '"144.0.7559.110"',
+            'sec-ch-ua-full-version-list': '"Not(A:Brand";v="8.0.0.0", "Chromium";v="144.0.7559.110", "Google Chrome";v="144.0.7559.110"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-model': '""',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-ch-ua-platform-version': '"10.0.0"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+            'x-conduit-token': 'no-token',
+        }
+
+        json_data = {
+            'action': 'next',
+            'fork_from_shared_post': False,
+            'parent_message_id': 'client-created-root',
+            'model': 'auto',
+            'timezone_offset_min': -360,
+            'timezone': 'Etc/GMT-6',
+            'conversation_mode': {'kind': 'primary_assistant'},
+            'system_hints': [],
+            'supports_buffering': True,
+            'supported_encodings': ['v1'],
+            'client_contextual_info': {'app_name': 'chat.chatgptplus.cn'},
+        }
+
+        response = requests.post(
+            'https://chat.chatgptplus.cn/backend-api/f/conversation/prepare',
+            cookies=cookies,
+            headers=headers,
+            json=json_data,
+        )
+
+        conduit_token = response.json()['conduit_token']
+
+        # --- 2. CHAT REQUEST ---
+        # Обновляем токены и куки, как в твоем скрипте
+        cookies = {
+            '_ga': 'GA1.1.1379913415.1767064677',
+            'gfsessionid': '3vpn450b3s4zj0dg2joermikyaguhz18',
+            '_account': 'eff23844-b9f4-437a-901c-a547119353a9',
+            'oai-last-model-config': '%7B%22model%22%3A%22gpt-5-2-pro%22%7D',
+            'oai-nav-state': '1',
+            'cf_clearance': 'jJyWmg.xPbR6ZmoGFl0v0KyoeCx6si2mYk9XN3mvYWg-1769846486-1.2.1.1-khh70TMg1fk53kH2NmA9j3lIYIwLcjLuiYDx3bgShaXvIyvUICXq_3poDmlQzLrg7kmbGpk5znKCocouCu0hsVxM1wb6YOrQfvume8H14t4GyXM3rcplQTaSKG8ghdxMCWuNz7XS8y.VCaVqUO4zcnokQ05PoYuzG4ifcJL5hTpOa.tm.wRvyV50N5ZBmidB6e72V8d_qSZ89tC9mVTGQP75lZp9C1HtMJ3xAf8yqgM',
+            'oai-client-auth-info': '%7B%22user%22%3A%7B%22name%22%3A%22lzilnRqE%7C%22%2C%22email%22%3A%22lzilnRqE%7C%22%2C%22picture%22%3A%22%2Favatars.png%22%2C%22connectionType%22%3A2%2C%22timestamp%22%3A1769842901619%7D%2C%22isOptedOut%22%3Afalse%7D',
+            '_ga_9SHBSK2D9J': 'GS2.1.s1769841202$o30$g1$t1769842999$j59$l0$h0',
+            '_dd_s': 'aid=a58c92c5-f6c4-4d39-971b-6cee1f56ab45&logs=1&id=f346f767-f50a-405b-b0dc-97186e90cd7b&created=1769841098870&expire=1769843924294',
+        }
+
+        headers = {
+            'accept': 'text/event-stream',
+            'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+            'authorization': 'Bearer profesorlal3',
+            'chatgpt-account-id': 'eff23844-b9f4-437a-901c-a547119353a9',
+            'content-type': 'application/json',
+            'oai-client-version': 'prod-9f5aa1f7b48d4577791d0e660bac1111ba132ee6',
+            'oai-device-id': 'df703da8-f0d2-4f60-a677-351b2ac9ddd1',
+            'oai-echo-logs': '0,2561,1,12807,0,96745,1,97601,0,113941,1,116881,0,119796,1,127148,0,127216,1,129440',
+            'oai-language': 'ru-RU',
+            'openai-sentinel-chat-requirements-token': 'yyy',
+            'origin': 'https://chat.chatgptplus.cn',
+            'priority': 'u=1, i',
+            'referer': 'https://chat.chatgptplus.cn/c/697db73a-9614-832b-8ffb-a48b5c57d70b',
+            'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
+            'sec-ch-ua-arch': '"x86"',
+            'sec-ch-ua-bitness': '"64"',
+            'sec-ch-ua-full-version': '"144.0.7559.110"',
+            'sec-ch-ua-full-version-list': '"Not(A:Brand";v="8.0.0.0", "Chromium";v="144.0.7559.110", "Google Chrome";v="144.0.7559.110"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-model': '""',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-ch-ua-platform-version': '"10.0.0"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+            'x-conduit-token': conduit_token,
+        }
+
+        # Используем prompt из запроса клиента
+        prompt_text = f"Generate image: {req.prompt}"
+
+        json_data = {
+            'action': 'next',
+            'messages': [
+                {
+                    'id': '9fa754cc-2780-4b66-ace8-a334652f5a2e',
+                    'author': {'role': 'user'},
+                    'create_time': 1769843024.297,
+                    'content': {
+                        'content_type': 'text',
+                        'parts': [prompt_text],
+                    },
+                    'metadata': {
+                        'developer_mode_connector_ids': [], 'selected_connector_ids': [], 'selected_sync_knowledge_store_ids': [], 'selected_sources': [], 'selected_github_repos': [], 'selected_all_github_repos': False, 'serialization_metadata': {'custom_symbol_offsets': []},
+                    },
+                },
+            ],
+            'conversation_id': '697db73a-9614-832b-8ffb-a48b5c57d70b',
+            'parent_message_id': '828b5cf1-56d3-45c3-b455-dfbe4fa06b6e',
+            'model': 'gpt-5-2',
+            'timezone_offset_min': -360,
+            'timezone': 'Etc/GMT-6',
+            'conversation_mode': {'kind': 'primary_assistant'},
+            'enable_message_followups': True,
+            'system_hints': [],
+            'supports_buffering': True,
+            'supported_encodings': ['v1'],
+            'client_contextual_info': {
+                'is_dark_mode': True, 'time_since_loaded': 129, 'page_height': 641, 'page_width': 743, 'pixel_ratio': 1, 'screen_height': 768, 'screen_width': 1366, 'app_name': 'chat.chatgptplus.cn',
+            },
+            'paragen_cot_summary_display_override': 'allow',
+            'force_parallel_switch': 'auto',
+        }
+
+        response = requests.post(
+            'https://chat.chatgptplus.cn/backend-api/f/conversation',
+            cookies=cookies,
+            headers=headers,
+            json=json_data,
+        ).text
+
+        # --- 3. EXTRACT FILE ID ---
+        pattern = r"file_[0-9a-f]{32}"
+        matches = re.findall(pattern, response)
         
-    sitemap_xml.append('</urlset>')
-    
-    content = "\n".join(sitemap_xml)
-    return Response(content=content, media_type="application/xml")
+        if not matches:
+             raise HTTPException(status_code=500, detail="Image generation failed (No file ID found in response)")
+        
+        extracted_file_id = matches[-1]
 
-@app.get("/robots.txt", include_in_schema=False)
-async def get_robots():
-    content = """User-agent: *
-Allow: /
-Allow: /login
-Allow: /register
-Disallow: /dashboard
-Disallow: /api/
-Disallow: /static/dashboard.html
+        # --- 4. GET DOWNLOAD URL ---
+        # Снова обновляем куки/хедеры, как в скрипте для шага скачивания
+        cookies = {
+            '_ga': 'GA1.1.1379913415.1767064677',
+            'gfsessionid': '3vpn450b3s4zj0dg2joermikyaguhz18',
+            '_account': 'eff23844-b9f4-437a-901c-a547119353a9',
+            'oai-last-model-config': '%7B%22model%22%3A%22gpt-5-2-pro%22%7D',
+            'cf_clearance': 'y_GwzddivUK6AfBirUJ08_3l9SMCDb65m52RQkzy8QY-1769844798-1.2.1.1-88lILugwwf5jQ8uNqQYSNPz1ZQVUPvi.SzRt6yMWzSvEQA_TWMOEU923ZhPoC_XvN.tIsXqxzvE8Eu79..J7yOOK44On8q9B4p1ZVzLuF99Exze6g0.Z4P0YOQTSnt2JUqOd0myRF85MPF4Wbt8NsGb434fwrKleH66plaeCmMxU_LIKvraUpI7kAxlYOXuP57Fr6m7FsZawnZWxxg5quf.C.Rho30vOWwhDxs2fkOo',
+            'oai-nav-state': '1',
+            '_ga_9SHBSK2D9J': 'GS2.1.s1769841202$o30$g1$t1769841348$j8$l0$h0',
+            'oai-client-auth-info': '%7B%22user%22%3A%7B%22name%22%3A%22lzilnRqE%7C%22%2C%22email%22%3A%22lzilnRqE%7C%22%2C%22picture%22%3A%22%2Favatars.png%22%2C%22connectionType%22%3A2%2C%22timestamp%22%3A1769841830434%7D%2C%22isOptedOut%22%3Afalse%7D',
+            '_dd_s': 'aid=a58c92c5-f6c4-4d39-971b-6cee1f56ab45&logs=1&id=f346f767-f50a-405b-b0dc-97186e90cd7b&created=1769841098870&expire=1769842748817',
+        }
 
-Sitemap: https://nexus-api-2026.vercel.app/sitemap.xml
-"""
-    # Замените домен в строке Sitemap на ваш реальный!
-    return Response(content=content, media_type="text/plain")
+        headers = {
+            'accept': '*/*',
+            'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+            'authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjE5MzM0NGU2NS1iYmM5LTQ0ZDEtYTlkMC1mOTU3YjA3OWJkMGUiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOlsiaHR0cHM6Ly9hcGkub3BlbmFpLmNvbS92MSJdLCJhenAiOiJwZGxMSVgyWTcyTUlsMnJoTGhURTlWVjliTjkwNWtCaCIsImNsaWVudF9pZCI6ImFwcF9XWHJGMUxTa2lUdGZZcWlMNlh0anlndlgiLCJleHAiOjE3NjIxOTY5MzQsImh0dHBzOi8vYXBpIjp7Im9wZW5haSI6eyJjb20vcHJvZmlsZSI6eyJlbWFpbCI6InByb2Zlc29ybGFsMyJ9fX0sImh0dHBzOi8vYXBpLm9wZW5haS5jb20vYXV0aCI6eyJwb2lkIjoib3JnLVZMWnpFMm9rYTdONVFGSTdnbUd1eVdjWSIsInVzZXJfaWQiOiJ1c2VyLXdsSjVLYUVHa2lRR2JXTHBTRVUyRTFiVyJ9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJraXJzdGluY2hhZHdpY2syNTcxOTgwa2RlQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwiaWF0IjoxNzYxMzMyOTMzLCJpc3MiOiJodHRwczovL2F1dGgub3BlbmFpLmNvbSIsImp0aSI6IjE2YjFmMTg1LTE4OWMtNDZmZi04ZDMyLTBmZmFhYWVlMjQxMyIsIm5iZiI6MTc2MTMzMjkzMywicHdkX2F1dGhfdGltZSI6MTc1NDAzNTcwNCwic2NwIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJlbWFpbCIsIm1vZGVsLnJlYWQiLCJtb2RlbC5yZXF1ZXN0Iiwib3JnYW5pemF0aW9uLnJlYWQiLCJvcmdhbml6YXRpb24ud3JpdGUiLCJvZmZsaW5lX2FjY2VzcyJdLCJzZXNzaW9uX2lkIjoiN3Jsdk56N2VwcmJVczFkWUdnZ2s5bmxXb3BIZUI5UDIiLCJzdWIiOiJnb29nbGUtb2F1dGgyfDEwNTIwMzI5NDI0MTU0MTgwNjYwNSJ9.BBpzpYUorm_RsFv-JNNWELMXhhta36kNLh5S_59TJZQRyjYKxoIQfzjk3wJN_1Vd-ZNPgQ9eRTPMkdtrgah1dqgbLGkgg2T4oyJq4z-1tTLYb50t6g-vj2MW-YcArqouwmYL8avCGe90A_bL9LcxEwzL1hLtODSMn94mbLPCi26VPUBj9xwQJdP3deY-e2GpvIwbysz_eH-hP2vHooFhE0jebrE0FE-cuzyHU5b2h6YbzrfU_hwiPXuvGiZwON9LxndprXYuup5wzyNZEnufVTwDagGX5pCyGLSVk9bSILUz6zJkYMtFEBPyyDx-bL9hH041uDfDBUxi15w3hGVMgA',
+            'chatgpt-account-id': 'eff23844-b9f4-437a-901c-a547119353a9',
+            'oai-client-version': 'prod-9f5aa1f7b48d4577791d0e660bac1111ba132ee6',
+            'oai-device-id': '7210940c-40dd-4e07-8025-cad64976348a',
+            'oai-language': 'ru-RU',
+            'priority': 'u=1, i',
+            'referer': 'https://chat.chatgptplus.cn/c/697db0c8-1020-832e-858b-31fe7c920622',
+            'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
+            'sec-ch-ua-arch': '"x86"',
+            'sec-ch-ua-bitness': '"64"',
+            'sec-ch-ua-full-version': '"144.0.7559.110"',
+            'sec-ch-ua-full-version-list': '"Not(A:Brand";v="8.0.0.0", "Chromium";v="144.0.7559.110", "Google Chrome";v="144.0.7559.110"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-model': '""',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-ch-ua-platform-version': '"10.0.0"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+        }
+
+        params = {
+            'conversation_id': '697db0c8-1020-832e-858b-31fe7c920622',
+            'inline': 'false',
+        }
+
+        url_info = requests.get(
+            f'https://chat.chatgptplus.cn/backend-api/files/download/{extracted_file_id}',
+            params=params,
+            cookies=cookies,
+            headers=headers,
+        ).json()
+        
+        # Получаем URL
+        download_url = url_info.get('download_url')
+        if not download_url:
+            raise HTTPException(status_code=500, detail=f"Failed to get URL info: {url_info}")
+
+        final_url = f"https://chat.chatgptplus.cn{download_url}"
+
+        # --- 5. DOWNLOAD AND PROXY ---
+        # Скачиваем файл в память и сразу отдаем пользователю
+        img_response = requests.get(final_url, headers=headers, cookies=cookies, stream=True)
+
+        if img_response.status_code == 200:
+            # Списываем баланс только в самом конце
+            user.tokens_balance -= COST
+            api_key_obj.limit_tokens -= COST
+            await db.commit()
+            
+            # ОТДАЕМ БИНАРНИК
+            return Response(content=img_response.content, media_type="image/jpeg")
+        else:
+            raise HTTPException(status_code=502, detail=f"Upstream download error: {img_response.status_code}")
+
+    except Exception as e:
+        print(f"GPT Image Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+@app.get("/api/run/gpt-image")
+async def run_gpt_image_get(
+    key: str, 
+    prompt: str, 
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Позволяет генерировать картинку просто перейдя по ссылке (GET запрос).
+    Передает параметры в основную функцию.
+    """
+    request_data = GPTImageRequest(key=key, prompt=prompt)
+    return await run_gpt_image(request_data, db)
 # Импорт Response нужен в начале файла, если его нет:
-from fastapi import Response
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
