@@ -5,6 +5,7 @@ import secrets
 from datetime import datetime, timedelta
 from typing import List, Optional
 from contextlib import asynccontextmanager
+from curl_cffi import requests 
 from dotenv import load_dotenv
 import requests
 import re
@@ -1246,6 +1247,7 @@ async def run_gpt_image(
             cookies=cookies,
             headers=headers,
             json=json_data,
+            impersonate="chrome120"
         )
         if response.status_code != 200:
             print(f"DEBUG ERROR [Prepare]: Status {response.status_code}")
@@ -1339,6 +1341,7 @@ async def run_gpt_image(
             cookies=cookies,
             headers=headers,
             json=json_data,
+            impersonate="chrome120"
         ).text
 
         # --- 3. EXTRACT FILE ID ---
