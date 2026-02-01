@@ -107,7 +107,11 @@
     </div>
 
     <script>
-        // Translations
+        // --- GLOBAL VARIABLES ---
+        let globalRefCode = null; // Переменная для хранения кода
+        let currentEmail = "";
+
+        // --- TRANSLATIONS (оставляем без изменений) ---
         const translations = {
             "en": {
                 "tab_login": "LOGIN", "tab_register": "REGISTER",
@@ -154,13 +158,10 @@
             });
         }
         
-        // Init Lang
         const savedLang = localStorage.getItem('nexus_lang') || 'en';
         document.getElementById('lang-select').value = savedLang;
         changeLanguage(savedLang);
 
-        // Core Logic
-        let currentEmail = "";
         function getMsg(key) {
             const l = localStorage.getItem('nexus_lang') || 'en';
             return translations[l][key] || key;
@@ -179,6 +180,7 @@
                 document.getElementById('register-form').classList.remove('hidden');
                 document.querySelectorAll('.tab')[0].classList.remove('active');
                 document.querySelectorAll('.tab')[1].classList.add('active');
+                // pushState очищает URL, поэтому мы сохранили ref код заранее
                 window.history.pushState({}, "", "/register");
             }
             document.getElementById('verify-form').classList.add('hidden');
@@ -189,6 +191,9 @@
         async function registerUser() {
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-pass').value;
+            // ИСПОЛЬЗУЕМ СОХРАНЕННУЮ ГЛОБАЛЬНУЮ ПЕРЕМЕННУЮ ВМЕСТО ПОВТОРНОГО ЧТЕНИЯ URL
+            const referralCode = globalRefCode; 
+            
             const msgBox = document.getElementById('msg-box');
             if(!email || !password) { msgBox.innerText = getMsg("msg_empty"); return; }
             msgBox.innerText = getMsg("msg_processing");
@@ -197,7 +202,7 @@
                 const response = await fetch('/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email, password, referral_code: referralCode })
                 });
                 const data = await response.json();
                 if (response.ok) {
@@ -252,9 +257,22 @@
             } catch (e) { msgBox.innerText = "CONNECTION FAILURE"; }
         }
 
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // --- ИНИЦИАЛИЗАЦИЯ ---
         window.onload = function() {
-            if (window.location.pathname === '/register') switchMode('register');
-            else switchMode('login');
+            // 1. Сразу сохраняем реферальный код, пока URL не очищен
+            globalRefCode = getQueryParam('ref');
+            
+            // 2. Логика переключения вкладок
+            if (window.location.pathname === '/register' || globalRefCode) {
+                switchMode('register');
+            } else {
+                switchMode('login');
+            }
         };
     </script>
 </body>
