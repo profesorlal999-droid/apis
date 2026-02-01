@@ -24,6 +24,7 @@ import httpx
 import json
 import urllib.parse
 import pickle
+from fastapi import Response
 from sqlalchemy import LargeBinary # Добавить к импортам sqlalchemy
 # Остальные импорты уже есть, убедись что requests и json импортированы
 # --- КОНФИГУРАЦИЯ ---
@@ -247,6 +248,170 @@ async def gemini_chat(prompt: str, db: AsyncSession):
 
 
 
+
+
+# --- GEMINI IMAGE CONFIGURATION ---
+IMAGEN_AT_TOKEN = "AEHmXlEXuKlaeAWzQ-dHE5uMCPD6:1769906748197"
+IMAGEN_F_SID = "-5526697252036765155"
+IMAGEN_BL_SERVER = "boq_assistant-bard-web-server_20260128.03_p2"
+
+IMAGEN_INITIAL_COOKIES = {
+    '_gcl_au': '1.1.321804501.1769867681',
+    '_ga': 'GA1.1.170156978.1769867682',
+    'SID': 'g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y99h9WHWdR1wrd5ZqOwEwLwwACgYKARwSARESFQHGX2MiYDtBz6M4ZLr2o0VPzQmhhhoVAUF8yKoL1B25RPbKIRn8GzxuM2aZ0076',
+    '__Secure-1PSID': 'g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y9U0pAz-3TkC5ksCp0GItjJQACgYKAZsSARESFQHGX2MiyKFZwheb1FGfoBQTTQXvqxoVAUF8yKp0KI6Nqs3RFCwX07VjyDCN0076',
+    '__Secure-3PSID': 'g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y9jLMfSj7c9OlNwf0nD1AcpAACgYKASESARESFQHGX2Mi5iiHy2LFdBngPR300nkt_RoVAUF8yKqVcIDOjuqJFtziGWdgNkRI0076',
+    'HSID': 'Ah9YeSisMyhI6WIqA',
+    'SSID': 'AhHdOe0c5RcKS_O8j',
+    'APISID': 'xuothCntUVVWgUcw/Aq2XPdx7sNWWdO85m',
+    'SAPISID': 'RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U',
+    '__Secure-1PAPISID': 'RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U',
+    '__Secure-3PAPISID': 'RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U',
+    'COMPASS': 'gemini-pd=CjwACWuJV93jFYb_b6k1ZbZc5AVi75OXfwVJx6huPFdJgLZgT-iphNSBtyIyTho-2Gurv4U86El7hPmdVFUQi9P9ywYaXwAJa4lXLvbjFchc4_1pxVv6T7gLfJ2slxUaoulGsvyMeC-j3jnVGpAQWHeqydbFMC5a2ywGx3-W0RdB_hYBOblB5Xvwosrkr3XM_QPpkWQE1U1ZEPyUNCch4_659F_JIAEwAQ',
+    'NID': '528=by5du2Dtn531lheJBkzTPaI5AmjuzG_sSTaEmSxliY3Q4H3e4iivfMxOSLVqdQzFUaYi52trqVmqBFA9XJ2c7bgWpi6EKme9uppeU2gIalI25LC53Fh5olyCY_qs8q-pl31TPokrsLupt4GDAaUVw9YZJaufwui35Knp4wZuUpGKof8u39i8IYiLGwu6Sq_p6cDh2ND7wKDlPu35YZQht9Z-x-oD5thx9uPHTspFVPGsgY2Sk2wW7DTU5XrSmoR_lrcjpGYK8n1QBVUEGJ5rR7tdfBwiZJW-B3tAhr_nK4mQlySc6Cc9lBaq6Gcbufr22rOgqB2dTF7nOZGzjuqm2wv8koxsDx3IG7Wn2VQZFlP7KPG3vDqQ-O9iIRsLHHfZvkSuvKL3IlyrjJ9aCDURlgpi7ZpRIlpHLQZLt_YmbMafqoFraFxA_30rYpED_4WTzICUny0S2FjdvYiKy-z-UlGAup6tlUWiq2xN8Dv5fpOhW5TC-p6rhoSUQBScUpnzh54xLuO147_KA8JmFbW_oZjZ9JfU87D8y4tqs3-ujKCAkR_f9w9_ElyoDqRA6Myc-6mL3moYPRS_ndeSuvIu51urDd2M4zGP2jIwCmtGweW2hFmduzlNgLKdqa3V1ZK3RgWDvXKflgKaQiuj',
+    '_ga_WC57KJ50ZZ': 'GS2.1.s1769903163$o2$g0$t1769903163$j60$l0$h0',
+    '_ga_BF8Q35BMLM': 'GS2.1.s1769903163$o2$g0$t1769903163$j60$l0$h0',
+    '__Secure-1PSIDTS': 'sidts-CjIB7I_69ACI_ut9anc9-3DvYGxAP7aLbWzxw1vz8TdZWEHdiCnApClDhbyS20HzCy_rOhAA',
+    '__Secure-3PSIDTS': 'sidts-CjIB7I_69ACI_ut9anc9-3DvYGxAP7aLbWzxw1vz8TdZWEHdiCnApClDhbyS20HzCy_rOhAA',
+    'SIDCC': 'AKEyXzXkWnAWjbBPxa-NJml1Dg2CaJGsLa6-YVyh0A4qSHm0FOTG__2UCimtxGTSdlLp-XwatQ',
+    '__Secure-1PSIDCC': 'AKEyXzU2f-QfwX_0FtLkuU9VJxohGyg36to4nWf1FffevCChFWu0uVQ9OtV1ybcvLjJCoBfw',
+    '__Secure-3PSIDCC': 'AKEyXzXpYZORco20KCQZf1Qoe_NWRWTFr1TgpvpZEL6qyMOp9UHkHfXCdCAPeiBWaNsgj3M4Tg',
+}
+
+IMAGEN_HEADERS = {
+    'accept': '*/*',
+    'accept-language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7',
+    'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    'origin': 'https://gemini.google.com',
+    'priority': 'u=1, i',
+    'referer': 'https://gemini.google.com/',
+    'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
+    'sec-ch-ua-arch': '"x86"',
+    'sec-ch-ua-bitness': '"64"',
+    'sec-ch-ua-form-factors': '"Desktop"',
+    'sec-ch-ua-full-version': '"144.0.7559.110"',
+    'sec-ch-ua-full-version-list': '"Not(A:Brand";v="8.0.0.0", "Chromium";v="144.0.7559.110", "Google Chrome";v="144.0.7559.110"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-model': '""',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-ch-ua-platform-version': '"10.0.0"',
+    'sec-ch-ua-wow64': '?0',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+    'x-browser-channel': 'stable',
+    'x-browser-copyright': 'Copyright 2025 Google LLC. All rights reserved.',
+    'x-browser-validation': '5sIVVtVmIdhoPXzr4AHI3aD5P60=',
+    'x-browser-year': '1969',
+    'x-goog-ext-525001261-jspb': '[1,null,null,null,"fbb127bbb056c959",null,null,0,[4],null,null,1]',
+    'x-goog-ext-525005358-jspb': '["D98A3EE2-30BA-491D-9A23-0D4BAE17ACE8",1]',
+    'x-goog-ext-73010989-jspb': '[0]',
+    'x-same-domain': '1'
+}
+
+
+def _sync_gemini_image_request(prompt: str, cookies: dict):
+    """
+    Синхронная функция:
+    1. Отправляет запрос "Generate image: ..."
+    2. Парсит ответ на наличие ссылки
+    3. Скачивает картинку с теми же куками
+    4. Возвращает bytes картинки и новые cookies
+    """
+    session = requests.Session()
+    session.headers.update(IMAGEN_HEADERS)
+    session.cookies.update(cookies)
+    
+    # Подготовка запроса (Generate image + prompt)
+    full_prompt = f"Generate image: {prompt}"
+    req_id = int(random.random() * 10000000)
+    
+    params = {
+        'bl': IMAGEN_BL_SERVER,
+        'f.sid': IMAGEN_F_SID,
+        'hl': 'ru',
+        '_reqid': str(req_id),
+        'rt': 'c',
+    }
+    
+    # Структура сообщения [[text], null, [context]]
+    message_structure = [[full_prompt], None, [None, None, None]]
+    f_req_value = json.dumps([None, json.dumps(message_structure)])
+    
+    post_data = {'f.req': f_req_value, 'at': IMAGEN_AT_TOKEN}
+
+    try:
+        # 1. Запрос генерации
+        response = session.post(
+            'https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate',
+            params=params,
+            data=post_data,
+            timeout=60 # Генерация может занять время
+        )
+        
+        if response.status_code != 200:
+            return {"error": f"Gemini Error: {response.status_code}"}
+            
+        raw_response = response.text
+        
+        # 2. Поиск ссылки (Regex из примера)
+        pattern = r'https://lh3\.googleusercontent\.com/gg-dl/[^"]+'
+        found_urls = re.findall(pattern, raw_response)
+        
+        if not found_urls:
+            return {"error": "No image URL found in response. Verify prompt compliance."}
+            
+        # Убираем возможный мусор в конце (как в примере пользователя [:-1])
+        # Но regex [^"]+ обычно останавливается перед кавычкой. 
+        # На всякий случай проверим, если ссылка валидная, requests справится.
+        image_url = found_urls[0]
+        # Иногда regex захватывает лишний слэш экранирования, если ответ в JSON
+        image_url = image_url.replace('\\', '')
+        
+        # 3. Скачивание изображения
+        img_resp = session.get(image_url, timeout=30)
+        
+        if img_resp.status_code == 200:
+            return {
+                "image_data": img_resp.content, # bytes
+                "cookies": session.cookies
+            }
+        else:
+            return {"error": f"Image Download Failed: {img_resp.status_code}"}
+            
+    except Exception as e:
+        return {"error": str(e)}
+
+async def generate_gemini_image_async(prompt: str, db: AsyncSession):
+    """Асинхронная обертка: работа с БД и запуск потока"""
+    # 1. Загружаем куки для картинок (отдельный ключ в БД)
+    stmt = select(SystemData).where(SystemData.key == 'gemini_image_cookies')
+    result = await db.execute(stmt)
+    db_cookie = result.scalar_one_or_none()
+    
+    if db_cookie:
+        cookies = pickle.loads(db_cookie.value)
+    else:
+        cookies = IMAGEN_INITIAL_COOKIES
+        
+    # 2. Запускаем тяжелую задачу в потоке
+    import asyncio
+    result_data = await asyncio.to_thread(_sync_gemini_image_request, prompt, cookies)
+    
+    if "error" in result_data:
+        return {"error": result_data["error"]}
+        
+    # 3. Сохраняем новые куки
+    new_cookies_bytes = pickle.dumps(result_data["cookies"])
+    if db_cookie:
+        db_cookie.value = new_cookies_bytes
+    else:
+        new_entry = SystemData(key='gemini_image_cookies', value=new_cookies_bytes)
+        db.add(new_entry)
+    await db.commit()
+    
+    return {"image": result_data["image_data"]}
 
 
 
@@ -1155,8 +1320,56 @@ async def run_gemini(
     await db.commit()
 
     return ai_response
-# Импорт Response нужен в начале файла, если его нет:
-from fastapi import Response
+
+
+@app.get("/api/run/image")
+async def run_gemini_image(
+    key: str,
+    prompt: str,
+    db: AsyncSession = Depends(get_db)
+):
+    # Стоимость генерации картинки (дороже текста)
+    COST = 500 
+
+    # 1. Проверка API ключа
+    stmt = select(APIKey).where(APIKey.key_hash == key)
+    result = await db.execute(stmt)
+    api_key_obj = result.scalar_one_or_none()
+
+    if not api_key_obj:
+        raise HTTPException(status_code=403, detail="INVALID API KEY")
+
+    user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
+    user = user_result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=403, detail="USER NOT FOUND")
+
+    # 2. Проверка баланса
+    if user.tokens_balance < COST:
+        raise HTTPException(status_code=402, detail=f"INSUFFICIENT FUNDS. REQUIRED: {COST}")
+    
+    if api_key_obj.limit_tokens < COST:
+        raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
+
+    # 3. Запуск генерации
+    # Промпт уже модифицируется внутри функции (добавляется "Generate image: ")
+    result = await generate_gemini_image_async(prompt, db)
+    
+    if "error" in result:
+        # Если ошибка Gemini, деньги не списываем, возвращаем 500
+        raise HTTPException(status_code=500, detail=result["error"])
+
+    # 4. Списание средств при успехе
+    user.tokens_balance -= COST
+    api_key_obj.limit_tokens -= COST
+    await db.commit()
+
+    # 5. Возврат бинарного файла
+    # FastAPI Response позволяет вернуть bytes как файл
+    return Response(content=result["image"], media_type="image/jpeg")
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
