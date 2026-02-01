@@ -16,8 +16,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker, declarative_base, relationship
-from sqlalchemy import Column, Integer, String, Boolean, BigInteger, ForeignKey, select, func
+from sqlalchemy.orm import sessionmaker, declarative_base, relationship, backref
+from sqlalchemy import Column, Integer, String, Boolean, BigInteger, ForeignKey, select, func, DateTime 
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 import httpx
@@ -59,7 +59,15 @@ class User(Base):
     # Добавляем поле IP
     registration_ip = Column(String, index=True, nullable=True)
     
+
+    referral_code = Column(String, unique=True, index=True, nullable=True) # Личный код пользователя
+    referrer_id = Column(Integer, ForeignKey("users.id"), nullable=True)   # Кто пригласил этого юзера
+    invites_count = Column(Integer, default=0)                             # Сколько людей пригласил
+    unlimited_until = Column(DateTime, nullable=True)
+
+
     api_keys = relationship("APIKey", back_populates="user")
+    referred_users = relationship("User", backref=backref("referrer", remote_side=[id]))
 
 class APIKey(Base):
     __tablename__ = "api_keys"
@@ -80,6 +88,7 @@ class SystemData(Base):
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
+    referral_code: Optional[str] = None
 class AutoDrawRequest(BaseModel):
     key: str
     ink: List[List[List[int]]]
@@ -879,7 +888,9 @@ async def run_quickdraw(
     if not user:
         raise HTTPException(status_code=403, detail="USER NOT FOUND")
 
-    if user.tokens_balance < COST:
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    if not has_unlimited and user.tokens_balance < COST:
         raise HTTPException(status_code=402, detail="INSUFFICIENT GLOBAL BALANCE")
     
     if api_key_obj.limit_tokens < COST:
@@ -926,9 +937,10 @@ async def run_quickdraw(
         # Получаем список вариантов [[вариант1, вероятность], [вариант2, ...]]
         suggestions = google_data[1][0][1] 
         best_guess = suggestions[0] # Самый вероятный вариант (строка)
+        has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+        if not has_unlimited:
+            user.tokens_balance -= COST
         
-        # 4. Списание средств
-        user.tokens_balance -= COST
         api_key_obj.limit_tokens -= COST
         await db.commit()
 
@@ -994,16 +1006,31 @@ async def register(
             await db.commit()
             background_tasks.add_task(send_email_async, user_data.email, code)
             return {"message": "CODE RESENT"}
+    
+
 
     # 3. СОЗДАНИЕ НОВОГО ПОЛЬЗОВАТЕЛЯ
+
+
+    referrer_user = None
+    if user_data.referral_code:
+        # Ищем пользователя, чей код ввели
+        ref_res = await db.execute(select(User).where(User.referral_code == user_data.referral_code))
+        referrer_user = ref_res.scalar_one_or_none()
+
     code = generate_code()
+
+    new_my_ref_code = secrets.token_hex(4) 
+
     new_user = User(
         email=user_data.email,
         normalized_email=norm_email, # Сохраняем нормализованный вид
         hashed_password=get_password_hash(user_data.password),
         verification_code=code,
         is_active=False,
-        registration_ip=client_ip # Сохраняем IP
+        registration_ip=client_ip,
+        referral_code=new_my_ref_code,
+        referrer_id=referrer_user.id if referrer_user else None
     )
     
     db.add(new_user)
@@ -1024,10 +1051,28 @@ async def verify(data: UserVerify, db: AsyncSession = Depends(get_db)):
     if user.verification_code != data.code:
         raise HTTPException(status_code=400, detail="INVALID CODE")
     
-    user.is_active = True
-    user.verification_code = None
-    if user.tokens_balance == 0:
-        user.tokens_balance = 100000
+    if not user.is_active:
+        user.is_active = True
+        user.verification_code = None
+        if user.tokens_balance == 0:
+            user.tokens_balance = 100000
+        if user.referrer_id:
+            # Получаем пригласившего
+            referrer_res = await db.execute(select(User).where(User.id == user.referrer_id))
+            referrer = referrer_res.scalar_one_or_none()
+            
+            if referrer:
+                referrer.invites_count += 1
+                count = referrer.invites_count
+                
+                # Награды
+                if count == 1:
+                    referrer.tokens_balance += 50000
+                elif count == 2:
+                    referrer.tokens_balance += 120000
+                elif count == 3:
+                    # Даем безлимит на 30 дней от текущего момента
+                    referrer.unlimited_until = datetime.utcnow() + timedelta(days=30)
         
     await db.commit()
     
@@ -1055,7 +1100,18 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
 # --- ROUTES: API KEYS (Без изменений) ---
 @app.get("/api/user/me")
 async def get_me(user: User = Depends(get_current_user)):
-    return {"email": user.email, "balance": user.tokens_balance}
+    is_unlimited = False
+    if user.unlimited_until and user.unlimited_until > datetime.utcnow():
+        is_unlimited = True
+
+    return {
+        "email": user.email, 
+        "balance": user.tokens_balance,
+        "referral_code": user.referral_code,
+        "invites": user.invites_count,
+        "is_unlimited": is_unlimited,
+        "unlimited_until": user.unlimited_until.isoformat() if user.unlimited_until else None
+    }
 
 @app.get("/api/keys", response_model=List[KeyResponse])
 async def get_keys(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
@@ -1070,7 +1126,9 @@ async def create_key(key_data: KeyCreate, user: User = Depends(get_current_user)
     if count >= 5:
         raise HTTPException(status_code=400, detail="MAXIMUM 5 KEYS ALLOWED")
 
-    if key_data.limit > user.tokens_balance:
+    is_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    if not is_unlimited and key_data.limit > user.tokens_balance:
         raise HTTPException(status_code=400, detail=f"LIMIT EXCEEDS BALANCE ({user.tokens_balance})")
     
     if key_data.limit <= 0:
@@ -1122,9 +1180,12 @@ async def run_gpt_via_link(
     if not user:
         raise HTTPException(status_code=403, detail="USER NOT FOUND")
 
+
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
     # 2. Предварительная проверка баланса
     # Мы пока не знаем точную цену, но если баланс <= 0, отклоняем запрос сразу.
-    if user.tokens_balance <= 0:
+    if not has_unlimited and user.tokens_balance <= 0:
         raise HTTPException(status_code=402, detail="INSUFFICIENT GLOBAL BALANCE")
     
     if api_key_obj.limit_tokens <= 0:
@@ -1144,8 +1205,10 @@ async def run_gpt_via_link(
     # 5. Списание средств
     # Списываем фактическую стоимость. Баланс может уйти в небольшой минус,
     # если токенов было впритык — это нормальная практика.
-    user.tokens_balance -= total_cost
-    api_key_obj.limit_tokens -= total_cost
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+    if not has_unlimited:
+        user.tokens_balance -= total_cost 
+    api_key_obj.limit_tokens -= total_cost 
     
     await db.commit()
 
@@ -1174,8 +1237,17 @@ async def run_autodraw_predict(
     user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
     user = user_result.scalar_one_or_none()
 
-    if not user or user.tokens_balance < COST or api_key_obj.limit_tokens < COST:
+    if not user:
+        raise HTTPException(status_code=403, detail="USER NOT FOUND")
+
+    # --- ИЗМЕНЕНИЕ НАЧАЛО ---
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    if not has_unlimited and user.tokens_balance < COST:
         raise HTTPException(status_code=402, detail="INSUFFICIENT FUNDS")
+        
+    if api_key_obj.limit_tokens < COST:
+        raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
 
     # 2. Запрос к Google AutoDraw
     url = 'https://inputtools.google.com/request?ime=handwriting&app=autodraw&dbg=1&cs=1&oe=UTF-8'
@@ -1215,9 +1287,13 @@ async def run_autodraw_predict(
         # ['SUCCESS', [['GUID', ['suggestion1', 'suggestion2', ...], [], {debug...}]]]
         suggestions = google_data[1][0][1]
         
+        # Проверка на безлимит
+        has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
         # Списание средств
-        user.tokens_balance -= COST
-        api_key_obj.limit_tokens -= COST
+        if not has_unlimited:
+            user.tokens_balance -= COST
+            api_key_obj.limit_tokens -= COST
         await db.commit()
 
         return {
@@ -1249,7 +1325,13 @@ async def get_autodraw_icon(
     user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
     user = user_result.scalar_one_or_none()
 
-    if not user or user.tokens_balance < COST:
+    if not user:
+        raise HTTPException(status_code=402, detail="USER NOT FOUND")
+
+    # --- ИЗМЕНЕНИЕ НАЧАЛО ---
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    if not has_unlimited and user.tokens_balance < COST:
         raise HTTPException(status_code=402, detail="INSUFFICIENT FUNDS")
 
     # Формирование URL для SVG
@@ -1281,7 +1363,11 @@ async def get_autodraw_icon(
                 raise HTTPException(status_code=404, detail="ICON NOT FOUND")
 
     # Списание
-    user.tokens_balance -= COST
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    # Списание средств
+    if not has_unlimited:
+        user.tokens_balance -= COST
     api_key_obj.limit_tokens -= COST
     await db.commit()
 
@@ -1303,9 +1389,15 @@ async def run_gemini(
 
     user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
     user = user_result.scalar_one_or_none()
-
-    if not user or user.tokens_balance <= 0 or api_key_obj.limit_tokens <= 0:
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+    if not user:
+        raise HTTPException(status_code=402, detail="USER NOT FOUND")
+        
+    if not has_unlimited and user.tokens_balance <= 0:
         raise HTTPException(status_code=402, detail="INSUFFICIENT FUNDS")
+        
+    if api_key_obj.limit_tokens <= 0:
+        raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
 
     # 2. Вызов Gemini
     ai_response = await gemini_chat(prompt, db)
@@ -1315,7 +1407,11 @@ async def run_gemini(
 
     # 3. Списание средств (условно 100 токенов за запрос, т.к. токенайзер Gemini сложнее)
     COST = input_tokens + output_tokens
-    user.tokens_balance -= COST
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    # Списание средств
+    if not has_unlimited:
+        user.tokens_balance -= COST
     api_key_obj.limit_tokens -= COST
     await db.commit()
 
@@ -1342,11 +1438,9 @@ async def run_gemini_image(
     user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
     user = user_result.scalar_one_or_none()
 
-    if not user:
-        raise HTTPException(status_code=403, detail="USER NOT FOUND")
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
 
-    # 2. Проверка баланса
-    if user.tokens_balance < COST:
+    if not has_unlimited and user.tokens_balance < COST:
         raise HTTPException(status_code=402, detail=f"INSUFFICIENT FUNDS. REQUIRED: {COST}")
     
     if api_key_obj.limit_tokens < COST:
@@ -1361,7 +1455,11 @@ async def run_gemini_image(
         raise HTTPException(status_code=500, detail=result["error"])
 
     # 4. Списание средств при успехе
-    user.tokens_balance -= COST
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    # Списание средств
+    if not has_unlimited:
+        user.tokens_balance -= COST
     api_key_obj.limit_tokens -= COST
     await db.commit()
 
