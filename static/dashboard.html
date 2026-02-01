@@ -165,6 +165,7 @@
                 <button class="sub-tab-btn" onclick="showDocSection('gemini', this)">GEMINI (TEXT)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('imagen', this)">IMAGEN (VISION)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('autodraw', this)">AUTODRAW (MAGIC)</button>
+                <button class="sub-tab-btn" onclick="showDocSection('banana', this)">NANO-BANANA</button>
             </div>
 
             <!-- AutoDraw Documentation -->
@@ -339,7 +340,86 @@ fetch(url)
 curl "https://nexus-api-2026.vercel.app/api/run/gpt?key=sk-nx-XXX&model=auto&prompt=Hello%20World"</pre>
                 </div>
             </div>
+            <!-- NANO-BANANA Documentation -->
+            <div id="doc-banana" class="doc-container">
+                <p data-i18n="doc_ban_desc">Generate high-fidelity visual assets using the NANO-BANANA model. Returns raw image data (JPEG).</p>
+                
+                <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/image</code></p>
+                <p><strong>Method:</strong> <code style="color: var(--neon-blue);">GET</code></p>
+                <p><strong>Cost:</strong> <span style="color: #f44;">500 Tokens</span> / Request</p>
 
+                <div class="code-block">
+                    <h3>Python Integration</h3>
+                    <p style="color:#666; font-size:0.8rem;">Saves the generated image directly to a file.</p>
+                    <pre>
+import requests
+
+# 1. Configuration
+API_URL = "https://nexus-api-2026.vercel.app/api/run/image"
+API_KEY = "sk-nx-XXXXXXXXXXXXXXXX" # Your API Key
+PROMPT = "Cyberpunk city with neon lights, realistic, 8k"
+
+# 2. Make Request
+params = {
+    "key": API_KEY,
+    "prompt": PROMPT
+}
+
+print("Generating image... (This may take up to 30s)")
+response = requests.get(API_URL, params=params)
+
+# 3. Handle Binary Response
+if response.status_code == 200:
+    with open("nano_output.jpg", "wb") as f:
+        f.write(response.content)
+    print("Success! Saved as nano_output.jpg")
+else:
+    print(f"Error {response.status_code}: {response.text}")</pre>
+                </div>
+
+                <div class="code-block">
+                    <h3>JavaScript (Browser/Fetch)</h3>
+                    <p style="color:#666; font-size:0.8rem;">Fetches the image as a Blob and displays it in an &lt;img&gt; tag.</p>
+                    <pre>
+async function generateImage() {
+    const apiKey = "sk-nx-XXXXXXXXXXXXXXXX";
+    const prompt = "A cute robot eating a banana";
+    
+    // Construct URL
+    const url = new URL("https://nexus-api-2026.vercel.app/api/run/image");
+    url.searchParams.append("key", apiKey);
+    url.searchParams.append("prompt", prompt);
+
+    try {
+        console.log("Generating...");
+        const response = await fetch(url);
+
+        if (!response.ok) throw new Error(await response.text());
+
+        // Convert response to Blob (Binary Large Object)
+        const imageBlob = await response.blob();
+        
+        // Create a local URL for the blob
+        const imageUrl = URL.createObjectURL(imageBlob);
+        
+        // Display result
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        document.body.appendChild(img);
+        
+    } catch (err) {
+        console.error("Generation failed:", err);
+    }
+}</pre>
+                </div>
+
+                <div class="code-block">
+                    <h3>Direct Link</h3>
+                    <p style="color:#666; font-size:0.8rem;">You can paste this directly into a browser address bar.</p>
+                    <pre>
+https://nexus-api-2026.vercel.app/api/run/image?key=YOUR_KEY&prompt=Red%20Sports%20Car</pre>
+                </div>
+            </div>
             <!-- Imagen Documentation -->
             <div id="doc-imagen" class="doc-container">
                 <p data-i18n="doc_im_desc">Send sketch data to recognize objects using our Imagen recognition model.</p>
@@ -478,6 +558,7 @@ fetch(url)
         // --- TRANSLATIONS LOGIC ---
         const translations = {
             "en": {
+                "doc_ban_desc": "High-quality image generation using the NANO-BANANA model.",
                 "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOGOUT",
                 "h_keys": "API KEYS MANAGEMENT", "txt_keys_desc": "Create up to 5 keys. Limits cannot exceed your global balance.",
                 "th_name": "NAME", "th_key": "KEY", "th_limit": "LIMIT", "th_created": "CREATED", "th_action": "ACTION",
@@ -494,6 +575,7 @@ fetch(url)
                 "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR"
             },
             "en-gb": {
+                "doc_ban_desc": "High-quality image generation using the NANO-BANANA model.",
                 "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOG OUT",
                 "h_keys": "API KEYS MANAGEMENT", "txt_keys_desc": "Create up to 5 keys. Limits cannot exceed your global balance.",
                 "th_name": "NAME", "th_key": "KEY", "th_limit": "LIMIT", "th_created": "CREATED", "th_action": "ACTION",
@@ -510,6 +592,7 @@ fetch(url)
                 "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR"
             },
             "ru": {
+                "doc_ban_desc": "Генерация высококачественных изображений с помощью модели NANO-BANANA.",
                 "bal_title": "ОБЩИЙ БАЛАНС", "nav_keys": "API КЛЮЧИ", "nav_docs": "ДОКУМЕНТАЦИЯ", "nav_logout": "ВЫХОД",
                 "h_keys": "УПРАВЛЕНИЕ КЛЮЧАМИ", "txt_keys_desc": "Создайте до 5 ключей. Лимиты не могут превышать общий баланс.",
                 "th_name": "ИМЯ", "th_key": "КЛЮЧ", "th_limit": "ЛИМИТ", "th_created": "СОЗДАН", "th_action": "ДЕЙСТВИЕ",
@@ -526,6 +609,7 @@ fetch(url)
                 "err_fields": "ВСЕ ПОЛЯ ОБЯЗАТЕЛЬНЫ", "err_limit": "ЛИМИТ ПРЕВЫШАЕТ БАЛАНС", "err_sys": "СИСТЕМНАЯ ОШИБКА"
             },
             "es": {
+                "doc_ban_desc": "Generación de imágenes de alta calidad con el modelo NANO-BANANA.",
                 "bal_title": "BALANCE GLOBAL", "nav_keys": "CLAVES API", "nav_docs": "DOCUMENTACIÓN", "nav_logout": "SALIR",
                 "h_keys": "GESTIÓN DE CLAVES", "txt_keys_desc": "Crea hasta 5 claves. Los límites no pueden exceder tu balance.",
                 "th_name": "NOMBRE", "th_key": "CLAVE", "th_limit": "LÍMITE", "th_created": "CREADA", "th_action": "ACCIÓN",
