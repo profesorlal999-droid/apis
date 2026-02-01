@@ -102,6 +102,11 @@
         .code-block pre { margin: 0; color: #aaa; white-space: pre-wrap; font-size: 0.9rem; }
         .method { color: var(--neon-blue); font-weight: bold; }
         .url { color: #fff; }
+.ref-btn:hover {
+    background: rgba(188, 19, 254, 0.1) !important;
+    border-left-color: var(--neon-purple) !important;
+    color: #fff !important;
+}
     </style>
 </head>
 <body>
@@ -126,6 +131,11 @@
         </div>
         <button class="nav-btn active" onclick="showTab('keys')" data-i18n="nav_keys">API KEYS</button>
         <button class="nav-btn" onclick="showTab('docs')" data-i18n="nav_docs">DOCUMENTATION</button>
+<button class="nav-btn ref-btn" onclick="copyReferral()" style="color: var(--neon-purple); border-left-color: transparent;">
+    &#9733; INVITE & EARN
+</button>
+<!-- Скрытое поле для хранения кода -->
+<input type="hidden" id="user-ref-code">
         <button class="nav-btn logout" onclick="logout()" data-i18n="nav_logout">LOGOUT</button>
     </div>
 
@@ -664,6 +674,7 @@ fetch(url)
         // Init
         fetchUserData();
         fetchKeys();
+        let isUserUnlimited = false; // Добавьте глобальную переменную
 
         async function fetchUserData() {
             try {
@@ -671,8 +682,21 @@ fetch(url)
                 if(res.status === 401) logout();
                 const data = await res.json();
                 currentBalance = data.balance;
-                document.getElementById('balance-display').innerText = currentBalance.toLocaleString();
-                document.getElementById('modal-max-limit').innerText = currentBalance.toLocaleString();
+                isUserUnlimited = data.is_unlimited; // Сохраняем статус
+
+                if(data.is_unlimited) {
+                    document.getElementById('balance-display').innerText = "UNLIMITED ♾️";
+                    document.getElementById('balance-display').style.color = "#bc13fe";
+                    // Если безлимит, показываем "∞" в модальном окне
+                    document.getElementById('modal-max-limit').innerText = "∞"; 
+                } else {
+                    document.getElementById('balance-display').innerText = currentBalance.toLocaleString();
+                    document.getElementById('modal-max-limit').innerText = currentBalance.toLocaleString();
+                }
+                
+                if(data.referral_code) {
+                    document.getElementById('user-ref-code').value = data.referral_code;
+                }
             } catch(e) { console.error(e); }
         }
 
@@ -718,7 +742,10 @@ fetch(url)
                 errBox.innerText = getMsg("err_fields");
                 return;
             }
-            if(limit > currentBalance) {
+            
+            // Если НЕ безлимит, делаем проверку на клиенте. 
+            // Если безлимит - пропускаем проверку, сервер сам решит или разрешит.
+            if(!isUserUnlimited && limit > currentBalance) {
                 errBox.innerText = getMsg("err_limit");
                 return;
             }
@@ -772,6 +799,31 @@ fetch(url)
             localStorage.removeItem('nexus_token');
             window.location.href = '/login';
         }
+function copyReferral() {
+    const code = document.getElementById('user-ref-code').value;
+    if(!code) {
+        alert("Error: No referral code found. Try reloading.");
+        return;
+    }
+
+    // Формируем ссылку (используем текущий хост)
+    const link = `${window.location.origin}/register?ref=${code}`;
+    
+    const textToCopy = `NEXUS API | FREE API INTEGRATIONS\n\n${link}\n\nJoin now and get 100k free tokens!`;
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        // Визуальное подтверждение
+        const btn = document.querySelector('.ref-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "COPIED! &#10004;";
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert("Failed to copy link.");
+    });
+}
     </script>
 </body>
 </html>
