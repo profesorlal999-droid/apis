@@ -1066,11 +1066,11 @@ async def verify(data: UserVerify, db: AsyncSession = Depends(get_db)):
                 count = referrer.invites_count
                 
                 # Награды
-                if count == 1:
+                if count == 5:
                     referrer.tokens_balance += 50000
-                elif count == 2:
+                elif count == 10:
                     referrer.tokens_balance += 120000
-                elif count == 3:
+                elif count == 25:
                     # Даем безлимит на 30 дней от текущего момента
                     referrer.unlimited_until = datetime.utcnow() + timedelta(days=30)
         
@@ -1471,3 +1471,4 @@ async def run_gemini_image(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
