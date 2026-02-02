@@ -64,7 +64,8 @@
             width: 600px; height: 600px; max-width: 90vw; background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, transparent 70%); z-index: -1; pointer-events: none;
         }
         .hero-content {
-            width: 100%; max-width: 900px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 50px 40px;
+            width: 100%; max-width: 1000px; /* Немного расширил для 4 карточек */
+            border: 1px solid rgba(255, 255, 255, 0.1); padding: 50px 40px;
             background: rgba(10, 10, 10, 0.85); position: relative; backdrop-filter: blur(5px);
         }
         .corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--neon-blue); transition: all 0.5s ease; }
@@ -79,7 +80,7 @@
         p.subtitle { font-size: clamp(0.9rem, 2vw, 1.1rem); margin-bottom: 40px; color: #aaa; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto; }
         .cta-container { margin-bottom: 50px; display: flex; flex-direction: column; align-items: center; }
 
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-top: 30px; width: 100%; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 30px; width: 100%; }
         .feature-item {
             border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px 20px; text-align: left; transition: 0.3s;
             background: rgba(255,255,255,0.02); height: 100%; display: flex; flex-direction: column;
@@ -141,27 +142,41 @@
             </div>
 
             <div class="features-grid">
+                <!-- Feature 1 -->
                 <div class="feature-item">
                     <div class="feature-icon">&#10036;</div>
                     <h3 data-i18n="feat_1_title">MULTI-MODEL</h3>
-                    <p data-i18n="feat_1_desc">GPT-4, Gemini, DALL-E in one interface.</p>
+                    <p data-i18n="feat_1_desc">GPT, Gemini, NANO_BANANA in one interface.</p>
                 </div>
+                <!-- Feature 2 -->
                 <div class="feature-item">
                     <div class="feature-icon">&#9889;</div>
                     <h3 data-i18n="feat_2_title">QUICK START</h3>
                     <p data-i18n="feat_2_desc">Get an API key and make your first request in 30 seconds.</p>
                 </div>
+                <!-- Feature 3 -->
                 <div class="feature-item">
                     <div class="feature-icon">&#128274;</div>
                     <h3 data-i18n="feat_3_title">FREE TIER</h3>
                     <p data-i18n="feat_3_desc">100k tokens free. No hidden cards attached.</p>
+                </div>
+                <!-- Feature 4: Bonuses -->
+                <div class="feature-item">
+                    <div class="feature-icon">&#9733;</div>
+                    <h3 data-i18n="feat_4_title">BONUSES</h3>
+                    <p data-i18n="feat_4_desc">
+                        Invite friends:<br>
+                        5 refs: 50k tokens<br>
+                        10 refs: 120k tokens<br>
+                        25 refs: UNLIMITED (30d)
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
     <footer>
-        <p data-i18n="footer_text">SYSTEM STATUS: OPERATIONAL | &copy; 2024 NEXUS API INC. | ALL RIGHTS RESERVED</p>
+        <p data-i18n="footer_text">SYSTEM STATUS: OPERATIONAL | &copy; 2026 NEXUS API INC. | ALL RIGHTS RESERVED</p>
         <p style="margin-top: 5px; font-family: 'Orbitron'; color: #333;">01001000 01001001</p>
     </footer>
 
@@ -186,11 +201,13 @@
                 "cta_button": "START FREE >>",
                 "cta_note": "* 100,000 tokens granted on registration",
                 "feat_1_title": "MULTI-MODEL",
-                "feat_1_desc": "GPT-4, Gemini, DALL-E in one interface.",
+                "feat_1_desc": "GPT, Gemini, NANO_BANANA in one interface.",
                 "feat_2_title": "QUICK START",
                 "feat_2_desc": "Get an API key and make your first request in 30 seconds.",
                 "feat_3_title": "FREE TIER",
                 "feat_3_desc": "100k tokens free. No hidden cards attached.",
+                "feat_4_title": "BONUSES",
+                "feat_4_desc": "Referral rewards:<br>5 friends: 50,000 tokens<br>10 friends: 120,000 tokens<br>25 friends: UNLIMITED (30 days)",
                 "footer_text": "SYSTEM STATUS: OPERATIONAL | © 2024 NEXUS API INC. | ALL RIGHTS RESERVED"
             },
             "en-gb": {
@@ -204,11 +221,13 @@
                 "cta_button": "START FREE >>",
                 "cta_note": "* 100,000 tokens granted on registration",
                 "feat_1_title": "MULTI-MODEL",
-                "feat_1_desc": "GPT-4, Gemini, DALL-E in one interface.",
+                "feat_1_desc": "GPT, Gemini, NANO_BANANA in one interface.",
                 "feat_2_title": "QUICK START",
                 "feat_2_desc": "Obtain an API key and make your first request in 30 seconds.",
                 "feat_3_title": "FREE TIER",
                 "feat_3_desc": "100k tokens free. No hidden bank cards attached.",
+                "feat_4_title": "BONUSES",
+                "feat_4_desc": "Referral rewards:<br>5 friends: 50,000 tokens<br>10 friends: 120,000 tokens<br>25 friends: UNLIMITED (30 days)",
                 "footer_text": "SYSTEM STATUS: OPERATIONAL | © 2024 NEXUS API INC. | ALL RIGHTS RESERVED"
             },
             "ru": {
@@ -222,11 +241,13 @@
                 "cta_button": "НАЧАТЬ БЕСПЛАТНО >>",
                 "cta_note": "* 100,000 токенов начислены при регистрации",
                 "feat_1_title": "МУЛЬТИ-МОДЕЛЬ",
-                "feat_1_desc": "GPT-4, Gemini, DALL-E в одном интерфейсе.",
+                "feat_1_desc": "GPT, Gemini, NANO_BANANA в одном интерфейсе.",
                 "feat_2_title": "БЫСТРЫЙ СТАРТ",
                 "feat_2_desc": "Получи API ключ и сделай первый запрос за 30 секунд.",
                 "feat_3_title": "БЕСПЛАТНО",
                 "feat_3_desc": "100к токенов бесплатно. Никаких скрытых карт.",
+                "feat_4_title": "БОНУСЫ",
+                "feat_4_desc": "Награды за друзей:<br>5 друзей: 50,000 токенов<br>10 друзей: 120,000 токенов<br>25 друзей: БЕЗЛИМИТ на 30 дней",
                 "footer_text": "СТАТУС СИСТЕМЫ: АКТИВЕН | © 2024 NEXUS API INC. | ВСЕ ПРАВА ЗАЩИЩЕНЫ"
             },
             "es": {
@@ -240,11 +261,13 @@
                 "cta_button": "EMPEZAR GRATIS >>",
                 "cta_note": "* 100,000 tokens otorgados al registrarse",
                 "feat_1_title": "MULTI-MODELO",
-                "feat_1_desc": "GPT-4, Gemini, DALL-E en una sola interfaz.",
+                "feat_1_desc": "GPT, Gemini, NANO_BANANA en una sola interfaz.",
                 "feat_2_title": "INICIO RÁPIDO",
                 "feat_2_desc": "Obtén una clave API y realiza tu primera petición en 30 segundos.",
                 "feat_3_title": "NIVEL GRATUITO",
                 "feat_3_desc": "100k tokens gratis. Sin tarjetas ocultas.",
+                "feat_4_title": "BONIFICACIONES",
+                "feat_4_desc": "Recompensas por referidos:<br>5 amigos: 50,000 tokens<br>10 amigos: 120,000 tokens<br>25 amigos: ILIMITADO (30 días)",
                 "footer_text": "ESTADO DEL SISTEMA: OPERATIVO | © 2024 NEXUS API INC. | TODOS LOS DERECHOS RESERVADOS"
             }
         };
