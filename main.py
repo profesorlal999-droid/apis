@@ -455,63 +455,54 @@ async def get_token_count(text: str) -> dict:
     if not text:
         return {"tokenCount": 0, "string_tokens": []}
         
-    url = 'https://gptforwork.com/api/tokens/xai'
+    url = 'https://tokenizers.lunary.ai/v1/openai/token-chunks'
     
-    # Куки из вашего запроса
-    cookies = {
-        'cookieyes-consent': 'consentid:WjNpNXVGYnpRQThPaTRaOVR4ZjNta1RNdVhTelZjeVY,consent:yes,action:yes,necessary:yes,functional:yes,analytics:yes,performance:yes,advertisement:yes,other:yes',
-        '_ga': 'GA1.1.1270092703.1769688555',
-        '_fbp': 'fb.1.1770045129136.487594538641559',
-        '_clck': '1n7bim8%5E2%5Eg39%5E1%5E2220',
-        '_ga_12E3KHDD7X': 'GS2.1.s1770080851$o3$g1$t1770081770$j60$l0$h0',
-        '_clsk': 'iosw9t%5E1770081772989%5E3%5E1%5Eo.clarity.ms%2Fcollect',
-    }
-
-    # Заголовки из вашего запроса
+    # Заголовки (оставляем как были, они правильные)
     headers = {
         'accept': '*/*',
         'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-        'content-type': 'text/plain;charset=UTF-8',
-        'origin': 'https://gptforwork.com',
+        'content-type': 'application/json',
+        'origin': 'https://lunary.ai',
         'priority': 'u=1, i',
-        'referer': 'https://gptforwork.com/tools/tokenizer',
+        'referer': 'https://lunary.ai/',
         'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
+        'sec-fetch-site': 'same-site',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
     }
 
-    # Формируем тело запроса как JSON строку
+    # Формируем тело запроса
     payload_dict = {
-        "model": "grok-4-1-fast-non-reasoning",
-        "message": text
+        'text': text,
     }
-    payload_bytes = json.dumps(payload_dict).encode('utf-8')
+    # ВАЖНО: Преобразуем словарь в JSON-строку
+    payload_json = json.dumps(payload_dict) 
 
     async with httpx.AsyncClient() as client:
         try:
-            # Отправляем content=payload_bytes, чтобы httpx не менял content-type на application/json
+            # Отправляем content=payload_json (строка), а не словарь
             response = await client.post(
                 url, 
-                headers=headers, 
-                cookies=cookies, 
-                content=payload_bytes, 
-                timeout=10.0
+                headers=headers,  
+                content=payload_json, 
+                timeout=30.0
             )
             
             if response.status_code == 200:
                 data = response.json()
                 
                 # Извлекаем общее количество токенов
-                token_count = data.get('tokenCount', 0)
+                token_count = data.get('expectedTokenCount', 0)
                 
-                # Извлекаем массив строковых токенов
-                content = data.get('content', {})
-                token_ids = content.get('token_ids', [])
-                string_tokens = [item.get('string_token') for item in token_ids]
+                # Извлекаем массив чанков (безопасное получение)
+                chunks = data.get('chunks', [])
+                
+                # Проходимся по списку и достаем 'text'. 
+                # Если ключа нет, вернем пустую строку, чтобы не упало.
+                string_tokens = [item.get('text', '') for item in chunks]
                 
                 return {
                     "tokenCount": token_count,
