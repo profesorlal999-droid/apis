@@ -127,6 +127,14 @@
         }
         .btn-send:hover { background: #fff; box-shadow: 0 0 15px var(--neon-blue); }
         .success-msg { color: var(--neon-blue); margin-top: 10px; display: none; }
+/* Добавляем стиль для зеленого текста */
+.idea-text {
+    color: #4dff4d; /* Неоново-зеленый цвет */
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+    font-family: 'Roboto Mono', monospace;
+    text-shadow: 0 0 5px rgba(77, 255, 77, 0.4); /* Легкое свечение */
+}
     </style>
 </head>
 <body>
@@ -206,7 +214,7 @@
                 <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
                 
                 <h3 data-i18n="contact_title">/// CONTACT SYSTEM</h3>
-                
+                <p class="idea-text" data-i18n="contact_ideas_text">You can suggest your ideas, perhaps I will listen.</p>
                 <div class="input-group">
                     <input type="email" id="contact-email" class="nexus-input" 
                            placeholder="YOUR_EMAIL (OPTIONAL)" 
@@ -242,6 +250,7 @@
         const translations = {
             "en": {
                 "page_title": "NEXUS API | AI Gateway",
+                "contact_ideas_text": "You can suggest your ideas, perhaps I will listen.",
                 "nav_login": "/// LOGIN",
                 "nav_register": "REGISTER_INIT",
                 "nav_dashboard": "/// DASHBOARD",
@@ -271,6 +280,7 @@
             },
             "en-gb": {
                 "page_title": "NEXUS API | AI Gateway",
+                "contact_ideas_text": "You can suggest your ideas, perhaps I will listen.",
                 "nav_login": "/// LOG IN",
                 "nav_register": "REGISTER_INIT",
                 "nav_dashboard": "/// DASHBOARD",
@@ -300,7 +310,9 @@
             },
             "ru": {
                 "page_title": "NEXUS API | AI Шлюз",
+                "contact_ideas_text": "Puedes sugerir tus ideas, tal vez te escuche.",
                 "nav_login": "/// ВХОД",
+                "contact_ideas_text": "Можете предложить свои идеи, возможно я прислушаюсь.",
                 "nav_register": "РЕГИСТРАЦИЯ",
                 "nav_dashboard": "/// КАБИНЕТ",
                 "status_badge": "СИСТЕМА: ОНЛАЙН // ВЕРСИЯ 1.0",
