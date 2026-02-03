@@ -107,6 +107,39 @@
     border-left-color: var(--neon-purple) !important;
     color: #fff !important;
 }
+/* Tokenizer Styles */
+        .tokenizer-container {
+            display: flex; flex-direction: column; gap: 20px; height: 100%;
+        }
+        .tokenizer-input {
+            width: 100%; height: 150px; background: #111; border: 1px solid #333; 
+            color: #fff; padding: 15px; font-family: 'Roboto Mono', monospace; 
+            font-size: 1rem; resize: none; outline: none;
+        }
+        .tokenizer-input:focus { border-color: var(--neon-blue); }
+        
+        .token-stats {
+            font-family: 'Orbitron'; color: var(--neon-blue); font-size: 1.2rem;
+            background: #111; padding: 10px; border-left: 3px solid var(--neon-blue);
+        }
+
+        .token-visualizer {
+            background: #0a0a0a; border: 1px solid #333; padding: 20px;
+            min-height: 150px; font-family: 'Roboto Mono', monospace; 
+            line-height: 1.8; white-space: pre-wrap; word-wrap: break-word;
+        }
+
+        /* Цвета для токенов (чередование) */
+        .tok-0 { background: rgba(0, 243, 255, 0.15); color: #fff; }
+        .tok-1 { background: rgba(188, 19, 254, 0.15); color: #fff; }
+        .tok-2 { background: rgba(255, 255, 0, 0.15); color: #fff; }
+        .tok-3 { background: rgba(0, 255, 100, 0.15); color: #fff; }
+        .tok-4 { background: rgba(255, 100, 100, 0.15); color: #fff; }
+        
+        .tok-span {
+            padding: 2px 0; border-radius: 3px; margin: 0 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
     </style>
 </head>
 <body>
@@ -131,6 +164,8 @@
         </div>
         <button class="nav-btn active" onclick="showTab('keys')" data-i18n="nav_keys">API KEYS</button>
         <button class="nav-btn" onclick="showTab('docs')" data-i18n="nav_docs">DOCUMENTATION</button>
+        <button class="nav-btn" onclick="showTab('tokenizer')" data-i18n="nav_tokenizer">TOKENIZER</button>
+
 <button class="nav-btn ref-btn" onclick="copyReferral()" style="color: var(--neon-purple); border-left-color: transparent;">
     &#9733; INVITE & EARN
 </button>
@@ -163,6 +198,29 @@
             </table>
 
             <button class="btn-create" onclick="openModal()" data-i18n="btn_create_key">+ CREATE NEW KEY</button>
+        </div>
+<!-- Tab: Tokenizer -->
+        <div id="tab-tokenizer" class="section">
+            <h2 data-i18n="h_tokenizer">TOKENIZER & CALCULATOR</h2>
+            
+            <div class="tokenizer-container">
+                <div>
+                    <p style="color:#666; margin-bottom: 10px;" data-i18n="tok_desc">Enter text below to see real-time token count and segmentation.</p>
+                    <!-- Поле ввода -->
+                    <textarea id="tok-input" class="tokenizer-input" placeholder="Type something here..." oninput="handleTokenizeInput()"></textarea>
+                </div>
+
+                <!-- Статистика -->
+                <div class="token-stats">
+                    <span data-i18n="tok_count">Token Count:</span> <span id="tok-display-count">0</span>
+                </div>
+
+                <!-- Визуализация -->
+                <div>
+                    <h3 style="color:#aaa; font-size: 0.9rem;" data-i18n="tok_vis">VISUALIZATION</h3>
+                    <div id="tok-visualizer" class="token-visualizer"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Tab: Documentation -->
@@ -567,75 +625,103 @@ fetch(url)
     <script>
         // --- TRANSLATIONS LOGIC ---
         const translations = {
-            "en": {
-                "doc_ban_desc": "High-quality image generation using the NANO-BANANA model.",
-                "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOGOUT",
-                "h_keys": "API KEYS MANAGEMENT", "txt_keys_desc": "Create up to 5 keys. Limits cannot exceed your global balance.",
-                "th_name": "NAME", "th_key": "KEY", "th_limit": "LIMIT", "th_created": "CREATED", "th_action": "ACTION",
-                "btn_create_key": "+ CREATE NEW KEY", "btn_revoke": "REVOKE", 
-                "h_docs": "DEVELOPER DOCUMENTATION",
-                "doc_ad_desc": "Intelligent sketch completion. Draws standard icons based on your rough strokes.",
-                "doc_ex_interactive": "Interactive Example",
-                "doc_ex_desc": "Copy this code to implement the full AutoDraw flow:",
-                "doc_gpt_desc": "Interact with our advanced language models using simple HTTP requests.",
-                "doc_im_desc": "Send sketch data to recognize objects using our Imagen recognition model.",
-                "doc_im_client": "Client-Side Integration (Drawing Canvas)",
-                "doc_gem_desc": "Access Google's Gemini Pro model via our reverse-engineered API.",
-                "m_h_new": "GENERATE NEW KEY", "m_lbl_name": "Key Name", "m_lbl_limit": "Token Limit", "btn_cancel": "CANCEL", "btn_create": "CREATE",
-                "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR"
-            },
-            "en-gb": {
-                "doc_ban_desc": "High-quality image generation using the NANO-BANANA model.",
-                "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOG OUT",
-                "h_keys": "API KEYS MANAGEMENT", "txt_keys_desc": "Create up to 5 keys. Limits cannot exceed your global balance.",
-                "th_name": "NAME", "th_key": "KEY", "th_limit": "LIMIT", "th_created": "CREATED", "th_action": "ACTION",
-                "btn_create_key": "+ CREATE NEW KEY", "btn_revoke": "REVOKE",
-                "h_docs": "DEVELOPER DOCUMENTATION",
-                "doc_ad_desc": "Intelligent sketch completion. Draws standard icons based on your rough strokes.",
-                "doc_ex_interactive": "Interactive Example",
-                "doc_ex_desc": "Copy this code to implement the full AutoDraw flow:",
-                "doc_gpt_desc": "Interact with our advanced language models using simple HTTP requests.",
-                "doc_im_desc": "Send sketch data to recognise objects using our Imagen recognition model.",
-                "doc_im_client": "Client-Side Integration (Drawing Canvas)",
-                "doc_gem_desc": "Access Google's Gemini Pro model via our reverse-engineered API.",
-                "m_h_new": "GENERATE NEW KEY", "m_lbl_name": "Key Name", "m_lbl_limit": "Token Limit", "btn_cancel": "CANCEL", "btn_create": "CREATE",
-                "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR"
-            },
-            "ru": {
-                "doc_ban_desc": "Генерация высококачественных изображений с помощью модели NANO-BANANA.",
-                "bal_title": "ОБЩИЙ БАЛАНС", "nav_keys": "API КЛЮЧИ", "nav_docs": "ДОКУМЕНТАЦИЯ", "nav_logout": "ВЫХОД",
-                "h_keys": "УПРАВЛЕНИЕ КЛЮЧАМИ", "txt_keys_desc": "Создайте до 5 ключей. Лимиты не могут превышать общий баланс.",
-                "th_name": "ИМЯ", "th_key": "КЛЮЧ", "th_limit": "ЛИМИТ", "th_created": "СОЗДАН", "th_action": "ДЕЙСТВИЕ",
-                "btn_create_key": "+ СОЗДАТЬ КЛЮЧ", "btn_revoke": "УДАЛИТЬ",
-                "h_docs": "ДОКУМЕНТАЦИЯ",
-                "doc_ad_desc": "Умное автодополнение скетчей. Рисует стандартные иконки по вашим наброскам.",
-                "doc_ex_interactive": "Интерактивный Пример",
-                "doc_ex_desc": "Скопируйте этот код для внедрения AutoDraw:",
-                "doc_gpt_desc": "Взаимодействие с языковыми моделями через HTTP запросы.",
-                "doc_im_desc": "Отправка скетчей для распознавания объектов моделью Imagen.",
-                "doc_im_client": "Интеграция на клиенте (Canvas)",
-                "doc_gem_desc": "Доступ к модели Google Gemini Pro через наш API.",
-                "m_h_new": "СОЗДАТЬ НОВЫЙ КЛЮЧ", "m_lbl_name": "Название ключа", "m_lbl_limit": "Лимит токенов", "btn_cancel": "ОТМЕНА", "btn_create": "СОЗДАТЬ",
-                "err_fields": "ВСЕ ПОЛЯ ОБЯЗАТЕЛЬНЫ", "err_limit": "ЛИМИТ ПРЕВЫШАЕТ БАЛАНС", "err_sys": "СИСТЕМНАЯ ОШИБКА"
-            },
-            "es": {
-                "doc_ban_desc": "Generación de imágenes de alta calidad con el modelo NANO-BANANA.",
-                "bal_title": "BALANCE GLOBAL", "nav_keys": "CLAVES API", "nav_docs": "DOCUMENTACIÓN", "nav_logout": "SALIR",
-                "h_keys": "GESTIÓN DE CLAVES", "txt_keys_desc": "Crea hasta 5 claves. Los límites no pueden exceder tu balance.",
-                "th_name": "NOMBRE", "th_key": "CLAVE", "th_limit": "LÍMITE", "th_created": "CREADA", "th_action": "ACCIÓN",
-                "btn_create_key": "+ NUEVA CLAVE", "btn_revoke": "REVOCAR",
-                "h_docs": "DOCUMENTACIÓN",
-                "doc_ad_desc": "Completado inteligente de bocetos. Dibuja iconos basados en trazos.",
-                "doc_ex_interactive": "Ejemplo Interactivo",
-                "doc_ex_desc": "Copia este código para implementar AutoDraw:",
-                "doc_gpt_desc": "Interactúa con modelos de lenguaje avanzados vía HTTP.",
-                "doc_im_desc": "Envía bocetos para reconocer objetos con Imagen.",
-                "doc_im_client": "Integración Cliente (Canvas)",
-                "doc_gem_desc": "Acceso al modelo Google Gemini Pro vía API.",
-                "m_h_new": "GENERAR CLAVE", "m_lbl_name": "Nombre Clave", "m_lbl_limit": "Límite Tokens", "btn_cancel": "CANCELAR", "btn_create": "CREAR",
-                "err_fields": "CAMPOS REQUERIDOS", "err_limit": "LÍMITE EXCEDE BALANCE", "err_sys": "ERROR DEL SISTEMA"
-            }
-        };
+    "en": {
+        "doc_ban_desc": "High-quality image generation using the NANO-BANANA model.",
+        "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOGOUT",
+        "h_keys": "API KEYS MANAGEMENT", "txt_keys_desc": "Create up to 5 keys. Limits cannot exceed your global balance.",
+        "th_name": "NAME", "th_key": "KEY", "th_limit": "LIMIT", "th_created": "CREATED", "th_action": "ACTION",
+        "btn_create_key": "+ CREATE NEW KEY", "btn_revoke": "REVOKE", 
+        "h_docs": "DEVELOPER DOCUMENTATION",
+        "doc_ad_desc": "Intelligent sketch completion. Draws standard icons based on your rough strokes.",
+        "doc_ex_interactive": "Interactive Example",
+        "doc_ex_desc": "Copy this code to implement the full AutoDraw flow:",
+        "doc_gpt_desc": "Interact with our advanced language models using simple HTTP requests.",
+        "doc_im_desc": "Send sketch data to recognize objects using our Imagen recognition model.",
+        "doc_im_client": "Client-Side Integration (Drawing Canvas)",
+        "doc_gem_desc": "Access Google's Gemini Pro model via our reverse-engineered API.",
+        "m_h_new": "GENERATE NEW KEY", "m_lbl_name": "Key Name", "m_lbl_limit": "Token Limit", "btn_cancel": "CANCEL", "btn_create": "CREATE",
+        "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR",
+        
+        // --- NEW TOKENIZER KEYS ---
+        "nav_tokenizer": "TOKENIZER",
+        "h_tokenizer": "TOKENIZER TOOL",
+        "tok_desc": "Enter text below to see real-time token count and segmentation.",
+        "tok_count": "Token Count:",
+        "tok_vis": "VISUALIZATION (TOKENS)"
+    },
+    "en-gb": {
+        "doc_ban_desc": "High-quality image generation using the NANO-BANANA model.",
+        "bal_title": "GLOBAL BALANCE", "nav_keys": "API KEYS", "nav_docs": "DOCUMENTATION", "nav_logout": "LOG OUT",
+        "h_keys": "API KEYS MANAGEMENT", "txt_keys_desc": "Create up to 5 keys. Limits cannot exceed your global balance.",
+        "th_name": "NAME", "th_key": "KEY", "th_limit": "LIMIT", "th_created": "CREATED", "th_action": "ACTION",
+        "btn_create_key": "+ CREATE NEW KEY", "btn_revoke": "REVOKE",
+        "h_docs": "DEVELOPER DOCUMENTATION",
+        "doc_ad_desc": "Intelligent sketch completion. Draws standard icons based on your rough strokes.",
+        "doc_ex_interactive": "Interactive Example",
+        "doc_ex_desc": "Copy this code to implement the full AutoDraw flow:",
+        "doc_gpt_desc": "Interact with our advanced language models using simple HTTP requests.",
+        "doc_im_desc": "Send sketch data to recognise objects using our Imagen recognition model.",
+        "doc_im_client": "Client-Side Integration (Drawing Canvas)",
+        "doc_gem_desc": "Access Google's Gemini Pro model via our reverse-engineered API.",
+        "m_h_new": "GENERATE NEW KEY", "m_lbl_name": "Key Name", "m_lbl_limit": "Token Limit", "btn_cancel": "CANCEL", "btn_create": "CREATE",
+        "err_fields": "ALL FIELDS REQUIRED", "err_limit": "LIMIT EXCEEDS GLOBAL BALANCE", "err_sys": "SYSTEM ERROR",
+
+        // --- NEW TOKENIZER KEYS ---
+        "nav_tokenizer": "TOKENISER",
+        "h_tokenizer": "TOKENISER TOOL",
+        "tok_desc": "Enter text below to see real-time token count and segmentation.",
+        "tok_count": "Token Count:",
+        "tok_vis": "VISUALISATION (TOKENS)"
+    },
+    "ru": {
+        "doc_ban_desc": "Генерация высококачественных изображений с помощью модели NANO-BANANA.",
+        "bal_title": "ОБЩИЙ БАЛАНС", "nav_keys": "API КЛЮЧИ", "nav_docs": "ДОКУМЕНТАЦИЯ", "nav_logout": "ВЫХОД",
+        "h_keys": "УПРАВЛЕНИЕ КЛЮЧАМИ", "txt_keys_desc": "Создайте до 5 ключей. Лимиты не могут превышать общий баланс.",
+        "th_name": "ИМЯ", "th_key": "КЛЮЧ", "th_limit": "ЛИМИТ", "th_created": "СОЗДАН", "th_action": "ДЕЙСТВИЕ",
+        "btn_create_key": "+ СОЗДАТЬ КЛЮЧ", "btn_revoke": "УДАЛИТЬ",
+        "h_docs": "ДОКУМЕНТАЦИЯ",
+        "doc_ad_desc": "Умное автодополнение скетчей. Рисует стандартные иконки по вашим наброскам.",
+        "doc_ex_interactive": "Интерактивный Пример",
+        "doc_ex_desc": "Скопируйте этот код для внедрения AutoDraw:",
+        "doc_gpt_desc": "Взаимодействие с языковыми моделями через HTTP запросы.",
+        "doc_im_desc": "Отправка скетчей для распознавания объектов моделью Imagen.",
+        "doc_im_client": "Интеграция на клиенте (Canvas)",
+        "doc_gem_desc": "Доступ к модели Google Gemini Pro через наш API.",
+        "m_h_new": "СОЗДАТЬ НОВЫЙ КЛЮЧ", "m_lbl_name": "Название ключа", "m_lbl_limit": "Лимит токенов", "btn_cancel": "ОТМЕНА", "btn_create": "СОЗДАТЬ",
+        "err_fields": "ВСЕ ПОЛЯ ОБЯЗАТЕЛЬНЫ", "err_limit": "ЛИМИТ ПРЕВЫШАЕТ БАЛАНС", "err_sys": "СИСТЕМНАЯ ОШИБКА",
+
+        // --- NEW TOKENIZER KEYS ---
+        "nav_tokenizer": "ТОКЕНИЗАТОР",
+        "h_tokenizer": "ИНСТРУМЕНТ ТОКЕНИЗАЦИИ",
+        "tok_desc": "Введите текст ниже для подсчета токенов и просмотра сегментации.",
+        "tok_count": "Кол-во токенов:",
+        "tok_vis": "ВИЗУАЛИЗАЦИЯ (ТОКЕНЫ)"
+    },
+    "es": {
+        "doc_ban_desc": "Generación de imágenes de alta calidad con el modelo NANO-BANANA.",
+        "bal_title": "BALANCE GLOBAL", "nav_keys": "CLAVES API", "nav_docs": "DOCUMENTACIÓN", "nav_logout": "SALIR",
+        "h_keys": "GESTIÓN DE CLAVES", "txt_keys_desc": "Crea hasta 5 claves. Los límites no pueden exceder tu balance.",
+        "th_name": "NOMBRE", "th_key": "CLAVE", "th_limit": "LÍMITE", "th_created": "CREADA", "th_action": "ACCIÓN",
+        "btn_create_key": "+ NUEVA CLAVE", "btn_revoke": "REVOCAR",
+        "h_docs": "DOCUMENTACIÓN",
+        "doc_ad_desc": "Completado inteligente de bocetos. Dibuja iconos basados en trazos.",
+        "doc_ex_interactive": "Ejemplo Interactivo",
+        "doc_ex_desc": "Copia este código para implementar AutoDraw:",
+        "doc_gpt_desc": "Interactúa con modelos de lenguaje avanzados vía HTTP.",
+        "doc_im_desc": "Envía bocetos para reconocer objetos con Imagen.",
+        "doc_im_client": "Integración Cliente (Canvas)",
+        "doc_gem_desc": "Acceso al modelo Google Gemini Pro vía API.",
+        "m_h_new": "GENERAR CLAVE", "m_lbl_name": "Nombre Clave", "m_lbl_limit": "Límite Tokens", "btn_cancel": "CANCELAR", "btn_create": "CREAR",
+        "err_fields": "CAMPOS REQUERIDOS", "err_limit": "LÍMITE EXCEDE BALANCE", "err_sys": "ERROR DEL SISTEMA",
+
+        // --- NEW TOKENIZER KEYS ---
+        "nav_tokenizer": "TOKENIZADOR",
+        "h_tokenizer": "HERRAMIENTA DE TOKENIZACIÓN",
+        "tok_desc": "Ingrese texto abajo para ver el conteo de tokens y segmentación en tiempo real.",
+        "tok_count": "Conteo de Tokens:",
+        "tok_vis": "VISUALIZACIÓN (TOKENS)"
+    }
+};
 
         function changeLanguage(lang) {
             localStorage.setItem('nexus_lang', lang);
@@ -824,6 +910,110 @@ function copyReferral() {
         alert("Failed to copy link.");
     });
 }
+// --- TOKENIZER LOGIC ---
+    let debounceTimer;
+    let tokenizerController = null; // Для отмены предыдущих запросов
+
+    function handleTokenizeInput() {
+        const text = document.getElementById('tok-input').value;
+        const displayCount = document.getElementById('tok-display-count');
+        const visualizer = document.getElementById('tok-visualizer');
+
+        // 1. МОМЕНТАЛЬНАЯ РЕАКЦИЯ:
+        // Если поле очистили - убираем всё немедленно
+        if (!text) {
+            clearTimeout(debounceTimer); // Отменяем таймер
+            if (tokenizerController) tokenizerController.abort(); // Отменяем летящий запрос
+            displayCount.innerText = "0";
+            visualizer.innerHTML = "";
+            return;
+        }
+
+        // 2. ОПТИМИСТИЧНЫЙ UI:
+        // Сразу показываем текст пользователя в правом окне (пока без цветов),
+        // чтобы не было ощущения "лагов". Делаем его полупрозрачным, показывая, что идет загрузка.
+        visualizer.innerHTML = `<span style="color: #666;">${escapeHtml(text)}</span>`;
+        displayCount.innerText = "...";
+
+        // 3. DEBOUNCE:
+        // Ждем 500мс, чтобы не спамить сервер, но визуально текст уже есть
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => runTokenizer(text), 500);
+    }
+
+    async function runTokenizer(text) {
+        // Если есть активный запрос - отменяем его
+        if (tokenizerController) {
+            tokenizerController.abort();
+        }
+        
+        // Создаем новый контроллер для текущего запроса
+        tokenizerController = new AbortController();
+        const signal = tokenizerController.signal;
+
+        try {
+            const res = await fetch('/api/tokenize', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ text: text }),
+                signal: signal // Привязываем сигнал отмены
+            });
+
+            if (!res.ok) throw new Error("API Error");
+
+            const data = await res.json();
+            
+            // Проверка на случай, если поле уже успели очистить, пока шел ответ
+            // (хотя AbortController должен это поймать, но перестраховка)
+            const currentInput = document.getElementById('tok-input').value;
+            if (!currentInput) return; 
+
+            // 1. Обновляем счетчик
+            document.getElementById('tok-display-count').innerText = data.tokenCount;
+
+            // 2. Рендерим цвета (заменяем черновой текст на цветные токены)
+            const visualizer = document.getElementById('tok-visualizer');
+            visualizer.innerHTML = ""; // Очистка чернового текста
+
+            if (data.string_tokens && data.string_tokens.length > 0) {
+                let colorIndex = 0;
+                data.string_tokens.forEach(tokenStr => {
+                    const span = document.createElement('span');
+                    span.innerText = tokenStr;
+                    span.className = `tok-span tok-${colorIndex}`;
+                    visualizer.appendChild(span);
+                    
+                    // Циклический перебор цветов
+                    colorIndex = (colorIndex + 1) % 5;
+                });
+            } else {
+                // Если токенов не пришло, но текст есть (редкий кейс), просто покажем текст
+                visualizer.innerText = text;
+            }
+
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                // Это нормально, запрос был отменен, так как пользователь ввел что-то новое
+                console.log("Request aborted");
+            } else {
+                console.error(e);
+                document.getElementById('tok-display-count').innerText = "Error";
+            }
+        } finally {
+            tokenizerController = null;
+        }
+    }
+
+    // Вспомогательная функция для безопасности (чтобы HTML теги не ломали верстку при вводе)
+    function escapeHtml(text) {
+        if (!text) return text;
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
     </script>
 </body>
 </html>
