@@ -25,6 +25,7 @@ import json
 import urllib.parse
 import pickle
 from fastapi import Response
+from datetime import datetime # Для штампа времени в письме
 from sqlalchemy import LargeBinary # Добавить к импортам sqlalchemy
 # Остальные импорты уже есть, убедись что requests и json импортированы
 # --- КОНФИГУРАЦИЯ ---
@@ -123,7 +124,9 @@ class QuickDrawRequest(BaseModel):
     ink: List[List[List[int]]] 
     width: Optional[int] = 255 # Ширина холста (не обязательна, но полезна)
     height: Optional[int] = 255
-
+class ContactRequest(BaseModel):
+    email: Optional[EmailStr] = None
+    message: str
 # --- УТИЛИТЫ ---
 
 
@@ -538,6 +541,54 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     if user is None:
         raise credentials_exception
     return user
+
+
+async def send_contact_email_to_admin(user_email: str, message_text: str):
+    """Отправка сообщения с сайта на почту администратора"""
+    if not BREVO_API_KEY:
+        print("BREVO_API_KEY is missing")
+        return
+
+    admin_email = "profesorlalforusers@gmail.com"
+    
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "accept": "application/json", 
+        "api-key": BREVO_API_KEY, 
+        "content-type": "application/json"
+    }
+    
+    # Формируем красивое письмо для админа
+    html_content = f"""
+    <div style="background:#050505; color:#e0e0e0; padding:20px; font-family:monospace; border: 1px solid #00f3ff;">
+        <h2 style="color:#00f3ff; border-bottom: 1px solid #333; padding-bottom: 10px;">NEXUS CONTACT FORM</h2>
+        <p style="color:#888;">SENDER:</p>
+        <p style="font-size: 16px; color:#fff;">{user_email if user_email else 'Anonymous'}</p>
+        <br>
+        <p style="color:#888;">MESSAGE:</p>
+        <div style="background: #111; padding: 15px; border-left: 3px solid #bc13fe;">
+            {message_text}
+        </div>
+        <p style="font-size: 10px; color: #555; margin-top: 30px;">SYSTEM TIMESTAMP: {datetime.utcnow()}</p>
+    </div>
+    """
+    
+    payload = {
+        "sender": {"name": "NEXUS SYSTEM", "email": SENDER_EMAIL},
+        "to": [{"email": admin_email}],
+        "replyTo": {"email": user_email} if user_email else {"email": SENDER_EMAIL},
+        "subject": f"NEXUS MSG: {user_email if user_email else 'Anonymous'}",
+        "htmlContent": html_content
+    }
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(url, json=payload, headers=headers)
+            if resp.status_code not in [200, 201, 202]:
+                print(f"Error sending contact email: {resp.text}")
+        except Exception as e:
+            print(f"Exception sending contact email: {e}")
+
 
 async def send_email_async(to_email: str, code: str):
     print(f"--- EMAIL SIMULATION ---")
@@ -1502,6 +1553,27 @@ async def tokenize_text_endpoint(
     # Используем уже существующую функцию get_token_count
     result = await get_token_count(req.text)
     return result
+
+
+
+@app.post("/api/contact")
+async def contact_form(
+    data: ContactRequest, 
+    background_tasks: BackgroundTasks,
+    request: Request
+):
+    # Ограничение длины сообщения
+    if len(data.message) > 2000:
+         raise HTTPException(status_code=400, detail="MESSAGE TOO LONG")
+         
+    # Получаем IP для логов (опционально)
+    client_ip = get_client_ip(request)
+    
+    # Отправляем в фоне
+    background_tasks.add_task(send_contact_email_to_admin, data.email, data.message)
+    
+    return {"status": "ok", "message": "Message dispatched"}
+
 
 if __name__ == "__main__":
     import uvicorn
