@@ -101,7 +101,8 @@ class UserVerify(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-
+class TokenizeRequest(BaseModel):
+    text: str
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -1502,7 +1503,14 @@ async def run_gemini_image(
     # 5. Возврат бинарного файла
     # FastAPI Response позволяет вернуть bytes как файл
     return Response(content=result["image"], media_type="image/jpeg")
-
+@app.post("/api/tokenize")
+async def tokenize_text_endpoint(
+    req: TokenizeRequest,
+    user: User = Depends(get_current_user) # Требуем авторизацию, чтобы не спамили
+):
+    # Используем уже существующую функцию get_token_count
+    result = await get_token_count(req.text)
+    return result
 
 if __name__ == "__main__":
     import uvicorn
