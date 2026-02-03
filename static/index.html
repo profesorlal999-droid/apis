@@ -98,6 +98,35 @@
             .hero { padding-top: 180px; }
             .features-grid { grid-template-columns: 1fr; }
         }
+/* Contact Form Styles */
+        .contact-section {
+            width: 100%; 
+            max-width: 600px; 
+            /* Изменили margin-top на margin сокращенный: */
+            margin: 60px auto 0; /* 60px сверху, auto по бокам, 0 снизу */
+            padding: 30px; 
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            background: rgba(5, 5, 5, 0.6); 
+            backdrop-filter: blur(5px);
+            position: relative;
+        }
+        .contact-section h3 { margin-bottom: 20px; color: #fff; font-size: 1.2rem; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .nexus-input {
+            width: 100%; background: rgba(0,0,0,0.5); border: 1px solid #333;
+            color: var(--neon-blue); padding: 12px; font-family: 'Roboto Mono';
+            margin-top: 5px; outline: none; transition: 0.3s;
+        }
+        .nexus-input:focus { border-color: var(--neon-purple); box-shadow: 0 0 10px rgba(188, 19, 254, 0.2); }
+        textarea.nexus-input { resize: vertical; min-height: 100px; }
+        .btn-send {
+            width: 100%; background: var(--neon-blue); color: #000;
+            border: none; padding: 12px; font-weight: 900; letter-spacing: 2px;
+            cursor: pointer; font-family: 'Orbitron'; clip-path: polygon(0 0, 100% 0, 100% 70%, 95% 100%, 0 100%);
+            transition: 0.3s;
+        }
+        .btn-send:hover { background: #fff; box-shadow: 0 0 15px var(--neon-blue); }
+        .success-msg { color: var(--neon-blue); margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -172,6 +201,27 @@
                     </p>
                 </div>
             </div>
+<!-- Contact Form Block -->
+            <div class="contact-section">
+                <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
+                
+                <h3 data-i18n="contact_title">/// CONTACT SYSTEM</h3>
+                
+                <div class="input-group">
+                    <input type="email" id="contact-email" class="nexus-input" 
+                           placeholder="YOUR_EMAIL (OPTIONAL)" 
+                           data-i18n-placeholder="contact_email_ph">
+                </div>
+                
+                <div class="input-group">
+                    <textarea id="contact-message" class="nexus-input" 
+                              placeholder="ENTER_MESSAGE_DATA..." 
+                              data-i18n-placeholder="contact_msg_ph"></textarea>
+                </div>
+                
+                <button class="btn-send" onclick="sendContact()" data-i18n="contact_btn">TRANSMIT >></button>
+                <p id="contact-status" class="success-msg" data-i18n="contact_success">TRANSMISSION COMPLETE.</p>
+            </div>
         </div>
     </section>
 
@@ -208,7 +258,16 @@
                 "feat_3_desc": "100k tokens free. No hidden cards attached.",
                 "feat_4_title": "BONUSES",
                 "feat_4_desc": "Referral rewards:<br>5 friends: 50,000 tokens<br>10 friends: 120,000 tokens<br>25 friends: UNLIMITED (30 days)",
-                "footer_text": "SYSTEM STATUS: OPERATIONAL | © 2024 NEXUS API INC. | ALL RIGHTS RESERVED"
+                "footer_text": "SYSTEM STATUS: OPERATIONAL | © 2024 NEXUS API INC. | ALL RIGHTS RESERVED",
+                
+                // --- NEW CONTACT FORM KEYS ---
+                "contact_title": "/// CONTACT SYSTEM",
+                "contact_email_ph": "YOUR_EMAIL (OPTIONAL)",
+                "contact_msg_ph": "ENTER_MESSAGE_DATA...",
+                "contact_btn": "TRANSMIT >>",
+                "contact_sending": "TRANSMITTING...",
+                "contact_sent": "SENT.",
+                "contact_success": "TRANSMISSION COMPLETE."
             },
             "en-gb": {
                 "page_title": "NEXUS API | AI Gateway",
@@ -228,7 +287,16 @@
                 "feat_3_desc": "100k tokens free. No hidden bank cards attached.",
                 "feat_4_title": "BONUSES",
                 "feat_4_desc": "Referral rewards:<br>5 friends: 50,000 tokens<br>10 friends: 120,000 tokens<br>25 friends: UNLIMITED (30 days)",
-                "footer_text": "SYSTEM STATUS: OPERATIONAL | © 2024 NEXUS API INC. | ALL RIGHTS RESERVED"
+                "footer_text": "SYSTEM STATUS: OPERATIONAL | © 2024 NEXUS API INC. | ALL RIGHTS RESERVED",
+
+                // --- NEW CONTACT FORM KEYS ---
+                "contact_title": "/// CONTACT SYSTEM",
+                "contact_email_ph": "YOUR_EMAIL (OPTIONAL)",
+                "contact_msg_ph": "ENTER_MESSAGE_DATA...",
+                "contact_btn": "TRANSMIT >>",
+                "contact_sending": "TRANSMITTING...",
+                "contact_sent": "SENT.",
+                "contact_success": "TRANSMISSION COMPLETE."
             },
             "ru": {
                 "page_title": "NEXUS API | AI Шлюз",
@@ -248,7 +316,16 @@
                 "feat_3_desc": "100к токенов бесплатно. Никаких скрытых карт.",
                 "feat_4_title": "БОНУСЫ",
                 "feat_4_desc": "Награды за друзей:<br>5 друзей: 50,000 токенов<br>10 друзей: 120,000 токенов<br>25 друзей: БЕЗЛИМИТ на 30 дней",
-                "footer_text": "СТАТУС СИСТЕМЫ: АКТИВЕН | © 2024 NEXUS API INC. | ВСЕ ПРАВА ЗАЩИЩЕНЫ"
+                "footer_text": "СТАТУС СИСТЕМЫ: АКТИВЕН | © 2024 NEXUS API INC. | ВСЕ ПРАВА ЗАЩИЩЕНЫ",
+
+                // --- NEW CONTACT FORM KEYS ---
+                "contact_title": "/// СИСТЕМА СВЯЗИ",
+                "contact_email_ph": "ВАШ_EMAIL (НЕОБЯЗАТЕЛЬНО)",
+                "contact_msg_ph": "ВВЕДИТЕ_ДАННЫЕ...",
+                "contact_btn": "ПЕРЕДАТЬ >>",
+                "contact_sending": "ПЕРЕДАЧА...",
+                "contact_sent": "ОТПРАВЛЕНО.",
+                "contact_success": "ПЕРЕДАЧА ЗАВЕРШЕНА."
             },
             "es": {
                 "page_title": "NEXUS API | Pasarela IA",
@@ -268,17 +345,36 @@
                 "feat_3_desc": "100k tokens gratis. Sin tarjetas ocultas.",
                 "feat_4_title": "BONIFICACIONES",
                 "feat_4_desc": "Recompensas por referidos:<br>5 amigos: 50,000 tokens<br>10 amigos: 120,000 tokens<br>25 amigos: ILIMITADO (30 días)",
-                "footer_text": "ESTADO DEL SISTEMA: OPERATIVO | © 2024 NEXUS API INC. | TODOS LOS DERECHOS RESERVADOS"
+                "footer_text": "ESTADO DEL SISTEMA: OPERATIVO | © 2024 NEXUS API INC. | TODOS LOS DERECHOS RESERVADOS",
+
+                // --- NEW CONTACT FORM KEYS ---
+                "contact_title": "/// SISTEMA DE CONTACTO",
+                "contact_email_ph": "TU_EMAIL (OPCIONAL)",
+                "contact_msg_ph": "INTRODUCIR_DATOS...",
+                "contact_btn": "TRANSMITIR >>",
+                "contact_sending": "TRANSMITIENDO...",
+                "contact_sent": "ENVIADO.",
+                "contact_success": "TRANSMISIÓN COMPLETADA."
             }
         };
 
         // Language Logic
         function changeLanguage(lang) {
             localStorage.setItem('nexus_lang', lang);
+            
+            // Перевод текста (innerHTML)
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[lang] && translations[lang][key]) {
                     el.innerHTML = translations[lang][key];
+                }
+            });
+
+            // Перевод плейсхолдеров (placeholder)
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang] && translations[lang][key]) {
+                    el.setAttribute('placeholder', translations[lang][key]);
                 }
             });
         }
@@ -287,6 +383,67 @@
         const savedLang = localStorage.getItem('nexus_lang') || 'en';
         document.getElementById('lang-select').value = savedLang;
         changeLanguage(savedLang);
+async function sendContact() {
+            // Берем значения и убираем лишние пробелы
+            let email = document.getElementById('contact-email').value.trim();
+            const message = document.getElementById('contact-message').value;
+            const btn = document.querySelector('.btn-send');
+            const statusMsg = document.getElementById('contact-status');
+
+            if (!message.trim()) {
+                alert("ERROR: EMPTY_MESSAGE_DATA");
+                return;
+            }
+
+            // Если email пустой, превращаем его в null, чтобы Pydantic не ругался
+            if (email === "") {
+                email = null;
+            }
+
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            btn.innerText = translations[localStorage.getItem('nexus_lang') || 'en']['contact_sending'] || "SENDING...";
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, message: message })
+                });
+
+                if (response.ok) {
+                    statusMsg.style.display = 'block';
+                    document.getElementById('contact-message').value = ''; // Очистить поле
+                    btn.innerText = translations[localStorage.getItem('nexus_lang') || 'en']['contact_sent'] || "SENT";
+                    
+                    setTimeout(() => {
+                        statusMsg.style.display = 'none';
+                        btn.disabled = false;
+                        btn.style.opacity = "1";
+                        // Возвращаем исходный текст кнопки
+                        const lang = localStorage.getItem('nexus_lang') || 'en';
+                        btn.innerHTML = translations[lang]['contact_btn'];
+                    }, 3000);
+                } else {
+                    // Читаем ошибку от сервера для отладки
+                    const errorData = await response.json();
+                    console.error("Server Error:", errorData);
+                    alert("SYSTEM ERROR: " + (errorData.detail || "TRANSMISSION FAILED"));
+                    
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    const lang = localStorage.getItem('nexus_lang') || 'en';
+                    btn.innerHTML = translations[lang]['contact_btn'];
+                }
+            } catch (e) {
+                console.error(e);
+                alert("NETWORK ERROR");
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                const lang = localStorage.getItem('nexus_lang') || 'en';
+                btn.innerHTML = translations[lang]['contact_btn'];
+            }
+        }
     </script>
 </body>
 </html>
