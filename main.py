@@ -441,13 +441,32 @@ def create_access_token(data: dict):
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-async def get_token_count(text: str) -> int:
+
+
+async def get_token_count(text: str) -> dict:
+    """
+    Возвращает словарь:
+    {
+        "tokenCount": int,
+        "string_tokens": List[str]
+    }
+    """
     if not text:
-        return 0
+        return {"tokenCount": 0, "string_tokens": []}
         
-    url = 'https://gptforwork.com/api/tokens/anthropic'
+    url = 'https://gptforwork.com/api/tokens/xai'
     
-    # Заголовки из вашего cURL
+    # Куки из вашего запроса
+    cookies = {
+        'cookieyes-consent': 'consentid:WjNpNXVGYnpRQThPaTRaOVR4ZjNta1RNdVhTelZjeVY,consent:yes,action:yes,necessary:yes,functional:yes,analytics:yes,performance:yes,advertisement:yes,other:yes',
+        '_ga': 'GA1.1.1270092703.1769688555',
+        '_fbp': 'fb.1.1770045129136.487594538641559',
+        '_clck': '1n7bim8%5E2%5Eg39%5E1%5E2220',
+        '_ga_12E3KHDD7X': 'GS2.1.s1770080851$o3$g1$t1770081770$j60$l0$h0',
+        '_clsk': 'iosw9t%5E1770081772989%5E3%5E1%5Eo.clarity.ms%2Fcollect',
+    }
+
+    # Заголовки из вашего запроса
     headers = {
         'accept': '*/*',
         'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -462,33 +481,48 @@ async def get_token_count(text: str) -> int:
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
-        # Cookies могут устареть, но используем предоставленные
-        'cookie': 'cookieyes-consent=consentid:WjNpNXVGYnpRQThPaTRaOVR4ZjNta1RNdVhTelZjeVY,consent:yes,action:yes,necessary:yes,functional:yes,analytics:yes,performance:yes,advertisement:yes,other:yes; _ga=GA1.1.1270092703.1769688555; _ga_12E3KHDD7X=GS2.1.s1769688554$o1$g0$t1769688556$j60$l0$h0; _clck=1n7bim8%5E2%5Eg34%5E1%5E2220; _clsk=z55pf4%5E1769688559428%5E2%5E1%5Ez.clarity.ms%2Fcollect'
     }
 
-    # Формируем тело запроса. Важно: API ждет строку, содержащую JSON
-    payload = json.dumps({
-        "model": "claude-sonnet-4-5-20250929",
+    # Формируем тело запроса как JSON строку
+    payload_dict = {
+        "model": "grok-4-1-fast-non-reasoning",
         "message": text
-    })
+    }
+    payload_bytes = json.dumps(payload_dict).encode('utf-8')
 
     async with httpx.AsyncClient() as client:
         try:
-            # content=payload отправляет данные как raw body
-            response = await client.post(url, headers=headers, content=payload, timeout=10.0)
+            # Отправляем content=payload_bytes, чтобы httpx не менял content-type на application/json
+            response = await client.post(
+                url, 
+                headers=headers, 
+                cookies=cookies, 
+                content=payload_bytes, 
+                timeout=10.0
+            )
             
             if response.status_code == 200:
                 data = response.json()
-                # Предполагаем, что API возвращает JSON вида {"tokens": 123}
-                # Если структура другая, нужно поправить этот ключ
-                return data.get('tokens', len(text) // 4) 
+                
+                # Извлекаем общее количество токенов
+                token_count = data.get('tokenCount', 0)
+                
+                # Извлекаем массив строковых токенов
+                content = data.get('content', {})
+                token_ids = content.get('token_ids', [])
+                string_tokens = [item.get('string_token') for item in token_ids]
+                
+                return {
+                    "tokenCount": token_count,
+                    "string_tokens": string_tokens
+                }
             else:
                 print(f"Token API Error: {response.status_code}")
-                # Fallback: грубая оценка (1 токен ~ 4 символа)
-                return len(text) // 4
+                # Fallback: грубая оценка
+                return {"tokenCount": len(text) // 4, "string_tokens": []}
         except Exception as e:
             print(f"Token API Exception: {e}")
-            return len(text) // 4
+            return {"tokenCount": len(text) // 4, "string_tokens": []}
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
@@ -1066,11 +1100,11 @@ async def verify(data: UserVerify, db: AsyncSession = Depends(get_db)):
                 count = referrer.invites_count
                 
                 # Награды
-                if count == 5:
+                if count == 1:
                     referrer.tokens_balance += 50000
-                elif count == 10:
+                elif count == 2:
                     referrer.tokens_balance += 120000
-                elif count == 25:
+                elif count == 3:
                     # Даем безлимит на 30 дней от текущего момента
                     referrer.unlimited_until = datetime.utcnow() + timedelta(days=30)
         
@@ -1198,9 +1232,11 @@ async def run_gpt_via_link(
     # 4. Подсчет токенов (Запрос + Ответ)
     # Запускаем подсчет параллельно или последовательно
     input_tokens = await get_token_count(prompt)
+  
+
     output_tokens = await get_token_count(ai_response)
     
-    total_cost = input_tokens + output_tokens
+    total_cost = input_tokens["tokenCount"] + output_tokens["tokenCount"]
 
     # 5. Списание средств
     # Списываем фактическую стоимость. Баланс может уйти в небольшой минус,
@@ -1406,7 +1442,7 @@ async def run_gemini(
     output_tokens = await get_token_count(ai_response)
 
     # 3. Списание средств (условно 100 токенов за запрос, т.к. токенайзер Gemini сложнее)
-    COST = input_tokens + output_tokens
+    COST = input_tokens['tokenCount'] + output_tokens['tokenCount']
     has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
 
     # Списание средств
@@ -1471,4 +1507,3 @@ async def run_gemini_image(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
