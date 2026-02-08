@@ -1118,6 +1118,10 @@ async def register(
     
     return {"message": "CODE SENT"}
 
+@app.get("/chat")
+async def read_chat():
+    return FileResponse("static/chat.html")
+
 @app.post("/auth/verify")
 async def verify(data: UserVerify, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == data.email))
