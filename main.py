@@ -948,7 +948,7 @@ async def chatgpt(model: str, prompt: str = "Hello") -> str:
         # Если декодирование совсем не удалось, возвращаем сырой текст или сообщение об ошибке, 
         # чтобы не ронять сервер с 500 ошибкой
         print(f"Decoding error: {e}")
-        return raw_text
+        return "GPT while not worked."
 
 
 @app.post("/api/run/draw")
@@ -1732,6 +1732,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
