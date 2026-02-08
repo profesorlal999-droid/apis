@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS | NEURAL CHAT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --neon-blue: #00f3ff; 
+            --neon-purple: #bc13fe; 
+            --neon-pink: #ff0055;
+            --bg-dark: #050505; 
+            --bg-panel: #0f0f0f;
+            --border-color: #333;
+        }
+        * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg-dark); color: #fff; font-family: 'Roboto Mono', monospace;
+            margin: 0; display: flex; height: 100vh; overflow: hidden;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Sidebar Settings */
+        .sidebar {
+            width: 300px; background: rgba(0,0,0,0.8); border-right: 1px solid var(--border-color);
+            padding: 20px; display: flex; flex-direction: column; gap: 20px;
+            backdrop-filter: blur(5px); z-index: 10;
+        }
+        .logo { 
+            font-family: 'Orbitron'; color: var(--neon-blue); font-size: 1.5rem; 
+            text-shadow: 0 0 10px rgba(0,243,255,0.3); cursor: pointer;
+        }
+        
+        .control-group label {
+            font-family: 'Orbitron'; color: #666; font-size: 0.8rem; display: block; margin-bottom: 8px;
+        }
+        .nexus-input, .nexus-select {
+            width: 100%; background: #000; border: 1px solid #333; color: var(--neon-blue);
+            padding: 10px; font-family: 'Roboto Mono'; outline: none; transition: 0.3s;
+        }
+        .nexus-input:focus, .nexus-select:focus { border-color: var(--neon-purple); box-shadow: 0 0 10px rgba(188, 19, 254, 0.2); }
+        
+        .btn-clear {
+            margin-top: auto; border: 1px solid #f44; color: #f44; background: transparent;
+            padding: 10px; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s;
+        }
+        .btn-clear:hover { background: #f44; color: #000; }
+
+        /* Chat Area */
+        .chat-container { flex: 1; display: flex; flex-direction: column; position: relative; }
+        
+        .chat-window {
+            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
+            scroll-behavior: smooth;
+            padding-bottom: 100px;
+        }
+        
+        /* Messages */
+        .msg {
+            max-width: 85%; padding: 15px; border: 1px solid; position: relative;
+            line-height: 1.6; word-wrap: break-word; font-size: 0.95rem;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+        .msg.user {
+            align-self: flex-end; border-color: var(--neon-purple); 
+            background: rgba(188, 19, 254, 0.05); color: #fff;
+            border-radius: 10px 10px 0 10px;
+        }
+        .msg.ai {
+            align-self: flex-start; border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.05); color: #ddd;
+            border-radius: 10px 10px 10px 0;
+            min-width: 300px;
+        }
+        .msg .sender {
+            position: absolute; top: -10px; font-size: 0.7rem; background: #000; padding: 0 5px;
+            font-family: 'Orbitron';
+        }
+        .msg.user .sender { right: 10px; color: var(--neon-purple); }
+        .msg.ai .sender { left: 10px; color: var(--neon-blue); }
+
+        /* --- MARKDOWN STYLING --- */
+        
+        /* Headers */
+        .msg h1, .msg h2, .msg h3 {
+            font-family: 'Orbitron';
+            color: var(--neon-blue);
+            margin: 20px 0 10px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+            padding-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        .msg h1 { font-size: 1.4rem; border-bottom: 2px solid var(--neon-blue); }
+        .msg h2 { font-size: 1.2rem; }
+        .msg h3 { font-size: 1.1rem; color: var(--neon-purple); border-color: var(--neon-purple); }
+        
+        /* Bold & Italic */
+        .msg strong { color: #fff; font-weight: bold; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .msg em { color: #ccc; font-style: italic; }
+
+        /* Inline Code */
+        .nexus-inline-code {
+            background: rgba(188, 19, 254, 0.15);
+            color: var(--neon-purple);
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        /* Lists */
+        .msg ul, .msg ol { margin: 10px 0; padding-left: 25px; }
+        .msg li { margin-bottom: 5px; color: #ddd; }
+        .msg li::marker { color: var(--neon-blue); }
+
+        /* --- CODE BLOCK STYLING --- */
+        .code-wrapper {
+            margin: 15px 0;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #080808;
+            overflow: hidden;
+            font-family: 'Roboto Mono', monospace;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #111;
+            padding: 8px 12px;
+            border-bottom: 1px solid #333;
+            color: var(--neon-blue);
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: 'Orbitron';
+        }
+
+        .btn-copy {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            transition: 0.2s;
+            font-family: 'Orbitron';
+        }
+        
+        .btn-copy:hover { border-color: var(--neon-blue); color: var(--neon-blue); }
+
+        .msg pre { margin: 0; padding: 15px; overflow-x: auto; color: #e0e0e0; background: #080808; }
+        .msg code { font-family: 'Roboto Mono', monospace; font-size: 0.9rem; }
+        
+        /* Input Area */
+        .input-area {
+            padding: 20px; background: rgba(0,0,0,0.9); border-top: 1px solid #333;
+            display: flex; gap: 10px;
+        }
+        .chat-input {
+            flex: 1; background: transparent; border: none; border-bottom: 2px solid #333;
+            color: #fff; padding: 10px; font-family: 'Roboto Mono'; font-size: 1rem; outline: none;
+        }
+        .chat-input:focus { border-color: var(--neon-blue); }
+        
+        .btn-send {
+            background: var(--neon-blue); color: #000; border: none; padding: 0 25px;
+            font-family: 'Orbitron'; font-weight: bold; cursor: pointer; 
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            transition: 0.3s;
+        }
+        .btn-send:hover { background: #fff; box-shadow: 0 0 15px var(--neon-blue); }
+        .btn-send:disabled { background: #333; cursor: not-allowed; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border: 1px solid #000; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; padding: 10px; flex-direction: row; flex-wrap: wrap; }
+            .control-group { flex: 1; min-width: 150px; }
+            .logo { width: 100%; text-align: center; margin-bottom: 10px; }
+            .btn-clear { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo" onclick="window.location.href='/dashboard'">NEXUS_CHAT</div>
+        
+        <div class="control-group">
+            <label>API ACCESS KEY</label>
+            <input type="password" id="api-key" class="nexus-input" placeholder="sk-nx-...">
+        </div>
+
+        <div class="control-group">
+            <label>NEURAL MODEL</label>
+            <select id="model-select" class="nexus-select">
+                <option value="agent">AGENT (CODE STREAM)</option>
+                <option value="gpt">GPT (TEXT)</option>
+                <option value="gemini">GEMINI (TEXT)</option>
+                <option value="banana">NANO-BANANA (IMAGE)</option>
+            </select>
+        </div>
+
+        <button class="btn-clear" onclick="clearChat()">/// PURGE LOGS</button>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-window" id="chat-window">
+            <div class="msg ai">
+                <span class="sender">SYSTEM</span>
+                CONNECTION ESTABLISHED.<br>SELECT MODEL AND ENTER COMMAND.
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" class="chat-input" placeholder="Enter instructions..." autocomplete="off">
+            <button id="send-btn" class="btn-send" onclick="sendMessage()">SEND >></button>
+        </div>
+    </div>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const apiKeyInput = document.getElementById('api-key');
+        const modelSelect = document.getElementById('model-select');
+
+        if(localStorage.getItem('nexus_api_key_chat')) {
+            apiKeyInput.value = localStorage.getItem('nexus_api_key_chat');
+        }
+        apiKeyInput.addEventListener('input', (e) => {
+            localStorage.setItem('nexus_api_key_chat', e.target.value);
+        });
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function clearChat() {
+            chatWindow.innerHTML = '<div class="msg ai"><span class="sender">SYSTEM</span>LOGS PURGED. READY.</div>';
+        }
+
+        // --- ENHANCED & CLEANER MARKDOWN PARSER ---
+        function formatMessage(rawText) {
+            // 0. Замена литеральных переносов строк (если пришли как "\n" текстом)
+            let text = rawText.replace(/\\n/g, '\n');
+
+            // 1. Извлекаем блоки кода (чтобы не испортить их содержимое при чистке)
+            const codeBlocks = [];
+            // Регулярка для захвата ```lang ... ```
+            text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+                const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+                const language = lang ? lang.toUpperCase() : 'CODE';
+                
+                // Экранируем HTML внутри кода, чтобы <script> не выполнился
+                const safeCode = code
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+
+                codeBlocks.push(`
+                    <div class="code-wrapper">
+                        <div class="code-header">
+                            <span>${language}</span>
+                            <button class="btn-copy" onclick="copyCode(this)">COPY</button>
+                        </div>
+                        <pre><code>${safeCode}</code></pre>
+                    </div>
+                `);
+                return placeholder;
+            });
+
+            // 2. ЧИСТКА "ПРОЗЫ" (ТЕКСТА) ОТ СЛЭШЕЙ
+            // Убираем слэши перед точками, воскл. знаками, кавычками, решетками и т.д.
+            // Было: 1\. Привет \"Мир\" -> Стало: 1. Привет "Мир"
+            text = text.replace(/\\([.!?"'#\-*\[\]\(\)])/g, '$1');
+
+            // 3. Экранирование HTML в обычном тексте
+            text = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            // 4. MARKDOWN ПАРСИНГ
+
+            // Инлайн код `...`
+            text = text.replace(/`([^`]+)`/g, '<span class="nexus-inline-code">$1</span>');
+
+            // Заголовки ###, ##, #
+            text = text.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+            text = text.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+            text = text.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+
+            // Жирный **...**
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Курсив *...*
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+            // Списки (дефис или звездочка в начале строки)
+            text = text.replace(/^[\-\*] (.*$)/gm, '<li>$1</li>');
+            
+            // Если есть элементы списка, оборачиваем их (грубая эвристика, но работает для простых списков)
+            // Ищем группы <li>...</li> и оборачиваем в <ul>
+            // Этот regex ищет подряд идущие li и оборачивает их
+            // (В браузере JS regex lookbehind ограничен, делаем проще: просто css стилизует li, а ul не обязателен визуально, но для семантики добавим)
+            if(text.includes('<li>')) {
+               text = text.replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+            }
+
+            // 5. Возвращаем блоки кода на место
+            codeBlocks.forEach((block, index) => {
+                text = text.replace(`__CODE_BLOCK_${index}__`, block);
+            });
+
+            return text;
+        }
+
+        function copyCode(btn) {
+            const wrapper = btn.closest('.code-wrapper');
+            const codeElement = wrapper.querySelector('code');
+            const textArea = document.createElement('textarea');
+            // Декодируем entities обратно для копирования
+            textArea.innerHTML = codeElement.innerHTML;
+            const textToCopy = textArea.value;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = "COPIED!";
+                btn.style.borderColor = "var(--neon-blue)";
+                btn.style.color = "var(--neon-blue)";
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.borderColor = "";
+                    btn.style.color = "";
+                }, 2000);
+            });
+        }
+
+        function appendMessage(text, sender, isHtml = false) {
+            const div = document.createElement('div');
+            div.className = `msg ${sender}`;
+            
+            const senderSpan = document.createElement('span');
+            senderSpan.className = 'sender';
+            senderSpan.innerText = sender === 'user' ? 'YOU' : 'NEXUS';
+            div.appendChild(senderSpan);
+
+            const contentDiv = document.createElement('div');
+            
+            if (isHtml) {
+                contentDiv.innerHTML = text;
+            } else {
+                contentDiv.innerText = text;
+                // 'pre-wrap' используется при стриминге, чтобы видеть переносы строк
+                // но финальная версия будет HTML, где <br> или блочные элементы сами делают перенос
+                contentDiv.style.whiteSpace = "pre-wrap"; 
+            }
+            
+            div.appendChild(contentDiv);
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            return contentDiv; 
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            const key = apiKeyInput.value.trim();
+            const model = modelSelect.value;
+
+            if (!text) return;
+            if (!key) { alert("ERROR: API KEY REQUIRED"); return; }
+
+            userInput.value = '';
+            appendMessage(text, 'user');
+            
+            sendBtn.disabled = true;
+            sendBtn.style.opacity = "0.5";
+
+            try {
+                if (model === 'agent') {
+                    const response = await fetch(`/api/run/agent?key=${key}&prompt=${encodeURIComponent(text)}&stream=true`);
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.detail || "Connection Failed");
+                    }
+
+                    const aiContentDiv = appendMessage('', 'ai');
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullTextAccumulator = "";
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        const chunk = decoder.decode(value, {stream: true});
+                        fullTextAccumulator += chunk;
+                        aiContentDiv.innerText = fullTextAccumulator; 
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                    }
+                    aiContentDiv.innerHTML = formatMessage(fullTextAccumulator);
+
+                } else if (model === 'banana') {
+                    const loadingDiv = appendMessage('GENERATING VISUAL DATA...', 'ai');
+                    const response = await fetch(`/api/run/image?key=${key}&prompt=${encodeURIComponent(text)}`);
+                    if (!response.ok) {
+                        const err = await response.json(); 
+                        loadingDiv.innerText = "ERROR: " + (err.detail || "Image Gen Failed");
+                    } else {
+                        const blob = await response.blob();
+                        const imgUrl = URL.createObjectURL(blob);
+                        loadingDiv.innerHTML = `<img src="${imgUrl}" style="max-width:100%; border:1px solid var(--neon-blue); border-radius:5px;">`;
+                    }
+                } else {
+                    const contentDiv = appendMessage('PROCESSING...', 'ai');
+                    let endpoint = model === 'gpt' ? '/api/run/gpt' : '/api/run/gemini';
+                    const response = await fetch(`${endpoint}?key=${key}&prompt=${encodeURIComponent(text)}&model=auto`);
+                    const data = await response.text(); 
+                    
+                    if (!response.ok) {
+                        try {
+                            const jsonErr = JSON.parse(data);
+                            contentDiv.innerText = "ERROR: " + (jsonErr.detail || "Request Failed");
+                        } catch(e) {
+                            contentDiv.innerText = "ERROR: " + data;
+                        }
+                    } else {
+                        let cleanText = data;
+                        // Иногда API возвращает строку в кавычках
+                        if(cleanText.startsWith('"') && cleanText.endsWith('"')) {
+                             try { cleanText = JSON.parse(cleanText); } catch(e){}
+                        }
+                        contentDiv.innerHTML = formatMessage(cleanText);
+                    }
+                }
+
+            } catch (e) {
+                appendMessage(`SYSTEM ERROR: ${e.message}`, 'ai');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = "1";
+                userInput.focus();
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
