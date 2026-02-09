@@ -231,6 +231,7 @@ def _sync_gemini_request(message_text, cookies):
 
 def parse_gemini_response(raw_text):
     if not raw_text: return None
+    print(raw_text)
     lines = raw_text.split('\n')
     final_text = ""
     for line in lines:
@@ -1743,6 +1744,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
