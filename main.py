@@ -221,7 +221,7 @@ def _sync_gemini_request(message_text, cookies):
             'https://gemini.google.com/u/1/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate',
             params=params,
             data=data,
-            timeout=30
+            timeout=3000
         )
         if response.status_code == 200:
             return {"text": response.text, "cookies": session.cookies}
@@ -392,7 +392,7 @@ def _sync_gemini_image_request(prompt: str, cookies: dict):
             'https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate',
             params=params,
             data=post_data,
-            timeout=60 # Генерация может занять время
+            timeout=3000 # Генерация может занять время
         )
         
         if response.status_code != 200:
@@ -1748,6 +1748,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
