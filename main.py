@@ -153,13 +153,13 @@ INITIAL_COOKIES_DICT = {
     '__Secure-3PAPISID': 'RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U',
     'COMPASS': 'gemini-pd=CjwACWuJV93jFYb_b6k1ZbZc5AVi75OXfwVJx6huPFdJgLZgT-iphNSBtyIyTho-2Gurv4U86El7hPmdVFUQi9P9ywYaXwAJa4lXLvbjFchc4_1pxVv6T7gLfJ2slxUaoulGsvyMeC-j3jnVGpAQWHeqydbFMC5a2ywGx3-W0RdB_hYBOblB5Xvwosrkr3XM_QPpkWQE1U1ZEPyUNCch4_659F_JIAEwAQ',
     'NID': '528=DQep5s2lC56R1bjm9M5KYYLbNH86Bcphuu6IFUCzh9J74JxeiBjwGDN0kMzRXyh3lEtkBpf-S9xxOma3ZxG0fewk19A1XeyR8DGu1kJVIZiFG6WXClkS3DgJ5VjXOQVdOeW0oaGf8qahhEbXMMtI_n60kqUvxO0_IAlAjlokdG2ZhCNR7qF6iExzCpCLXzW6y2MltIFDokp5Ck6j4OD0NqXOXJFncVraQgE5Y3Z251Bv3Ie1Ijk8CnpatTz0L_Cy0phh9jfcqWOWSKFwoFMndQUHI3ldgEeLEAfmhQ0dKJuX4_YmYoOlU-_VmwQ_PwDEjbwsb62EYfNu5RSKxlOkgH0V6YD9nJ4wZlbgyIIM29mWj2fQCeQ8NHF4kD9C0n_OV2dkU5dAInUSSrRtYyq1Fv9HmvqTWjYHzR_YdvOqYWyaMvE26eUSQnQZNEwlOufhU9cprJ7iy3r-CC1EOdvvtejoZkvfK5Z4T89L7mYLYDGd5a1PBVWnZw17QMwySeXZy847GPD3UN3urVAr4eXR0MIqBWp3LG19pGMgIise-7YRE6kf4mXKttoioSxYt5tUA1qjewK0y38EyUDJLDi6eB7zTjNzY1jwgra2MfkfpPgSHe5FarMe2ja0tKC-7vKhImxxvy9NxCWfSi9NzcUp8osD',
-    '_ga_WC57KJ50ZZ': 'GS2.1.s1770640488$o3$g0$t1770640488$j60$l0$h0',
-    '_ga_BF8Q35BMLM': 'GS2.1.s1770640489$o3$g0$t1770640489$j60$l0$h0',
     '__Secure-1PSIDTS': 'sidts-CjIB7I_69H_b9DTcOlsA5n7cE_e3H3audRZMGtl6d6VNaTTgZpSZ3z875HU6ALwgxHo4yRAA',
     '__Secure-3PSIDTS': 'sidts-CjIB7I_69H_b9DTcOlsA5n7cE_e3H3audRZMGtl6d6VNaTTgZpSZ3z875HU6ALwgxHo4yRAA',
-    'SIDCC': 'AKEyXzX1YnbubAApeX8vOlPADfoF4FqeipkwadWMpI0RrgmFY6UcUbAXYBOY7sgMQC-rl-BPFlU',
-    '__Secure-1PSIDCC': 'AKEyXzXT3eWU6fmqhTVk38OHIm84tPkuPa-DFJTu91iarQ3CVZuPWETO7cTcI8QFfHcHPvXk0g',
-    '__Secure-3PSIDCC': 'AKEyXzX_r7luRd0GVufSynaaNhOVbomHMKBQVBZA7_wiPZzH53PaXjrtYJLBVDZtICfjh2qbj9E',
+    '_ga_BF8Q35BMLM': 'GS2.1.s1770640489$o3$g1$t1770640850$j60$l0$h0',
+    '_ga_WC57KJ50ZZ': 'GS2.1.s1770640488$o3$g1$t1770640852$j56$l0$h0',
+    'SIDCC': 'AKEyXzUC9gKuZipB6JCYGCSk2Yann6TlFBkO2xJtFR2jcdlgdk4KiNt12xfv7WCvDSpb34eNufA',
+    '__Secure-1PSIDCC': 'AKEyXzWkVu0xPs3zDhWQTwpjGub3DPVCMurzNDoVjYdyCTMRewWu1TnT8-A9s-BED_7S4j72DQ',
+    '__Secure-3PSIDCC': 'AKEyXzVsyLErRAPkSV4VTPaHCCx9lIPgdviBGj1ibdIvk_fTIm3LwNqTPwwO7ml49fFr7Y76UWA',
 }
 
 GEMINI_HEADERS = {
@@ -209,10 +209,10 @@ def _sync_gemini_request(message_text, cookies):
     data = f"{data_prefix}{encoded_message}{data_suffix}&at={GEMINI_AT_TOKEN}&"
 
     params = {
-        'bl': 'boq_assistant-bard-web-server_20260128.03_p2',
-        'f.sid': '8915235416742414989',
+        'bl': 'boq_assistant-bard-web-server_20260204.08_p0',
+        'f.sid': '82734954708413835',
         'hl': 'ru',
-        '_reqid': '3818761',
+        '_reqid': '2866888',
         'rt': 'c',
     }
 
@@ -1741,6 +1741,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
