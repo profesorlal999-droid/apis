@@ -42,7 +42,26 @@
             padding: 10px; font-family: 'Roboto Mono'; outline: none; transition: 0.3s;
         }
         .nexus-input:focus, .nexus-select:focus { border-color: var(--neon-purple); box-shadow: 0 0 10px rgba(188, 19, 254, 0.2); }
+        /* ... существующие стили ... */
         
+        .btn-back {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--neon-blue);
+            padding: 10px;
+            cursor: pointer;
+            font-family: 'Orbitron';
+            transition: 0.3s;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+        }
+        .btn-back:hover {
+            border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
         .btn-clear {
             margin-top: auto; border: 1px solid #f44; color: #f44; background: transparent;
             padding: 10px; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s;
@@ -200,7 +219,7 @@
 
     <div class="sidebar">
         <div class="logo" onclick="window.location.href='/dashboard'">NEXUS_CHAT</div>
-        
+        <button class="btn-back" onclick="window.location.href='/dashboard'">< DASHBOARD</button>
         <div class="control-group">
             <label>API ACCESS KEY</label>
             <input type="password" id="api-key" class="nexus-input" placeholder="sk-nx-...">
