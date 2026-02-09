@@ -918,7 +918,7 @@ async def chatgpt(model: str, prompt: str = "Hello") -> str:
 
 
 
-    pattern = r'"v"\s*:\s*"(?!finished_successfully")((?:[^"\\]|\\.)*)"'
+    pattern = r'(?:\"p\":\s*\"/message/content/parts/0\",\s*\"o\":\s*\"append\",\s*\"v\":\s*|\"role\":\s*\"assistant\".*?\"parts\":\s*\[)\"(?P<content>(?:[^"\\]|\\.)*)\"'
     raw_text = "".join(re.findall(pattern, data))
     print(raw_text)
 
@@ -1718,6 +1718,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
