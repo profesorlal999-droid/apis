@@ -794,7 +794,7 @@ async def chatgpt(model: str, prompt: str = "Hello") -> str:
             'content': {
                 'content_type': 'text',
                 'parts': [
-                    prompt,
+                    'Hi',
                 ],
             },
         },
@@ -1718,6 +1718,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
