@@ -259,12 +259,17 @@ async def gemini_chat(prompt: str, db: AsyncSession):
     result = await db.execute(select(SystemData).where(SystemData.key == 'gemini_cookies'))
     db_cookie = result.scalar_one_or_none()
     
-    if db_cookie:
-        cookies = pickle.loads(db_cookie.value)
+    # ИСПРАВЛЕНИЕ: Проверяем db_cookie.value и добавляем try-except на случай битых данных
+    if db_cookie and db_cookie.value:
+        try:
+            cookies = pickle.loads(db_cookie.value)
+        except Exception:
+            # Если данные повреждены или не распикливаются, берем исходные
+            cookies = INITIAL_COOKIES_DICT
     else:
         cookies = INITIAL_COOKIES_DICT
 
-    # 2. Выполняем запрос синхронно в пуле потоков (requests блокирует, поэтому так надо)
+    # 2. Выполняем запрос синхронно в пуле потоков
     import asyncio
     response_data = await asyncio.to_thread(_sync_gemini_request, prompt, cookies)
     
@@ -273,11 +278,13 @@ async def gemini_chat(prompt: str, db: AsyncSession):
     
     # 3. Сохраняем обновленные куки в БД
     new_cookies_bytes = pickle.dumps(response_data["cookies"])
+    
     if db_cookie:
         db_cookie.value = new_cookies_bytes
     else:
         new_entry = SystemData(key='gemini_cookies', value=new_cookies_bytes)
         db.add(new_entry)
+        
     await db.commit()
 
     # 4. Парсим ответ
@@ -428,7 +435,7 @@ async def generate_gemini_image_async(prompt: str, db: AsyncSession):
     result = await db.execute(stmt)
     db_cookie = result.scalar_one_or_none()
     
-    if db_cookie:
+    if db_cookie and db_cookie.value:
         cookies = pickle.loads(db_cookie.value)
     else:
         cookies = IMAGEN_INITIAL_COOKIES
@@ -1741,6 +1748,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
