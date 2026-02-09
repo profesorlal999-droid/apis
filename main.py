@@ -779,7 +779,7 @@ async def chatgpt(model: str, prompt: str = "Hello") -> str:
         'action': 'next',
         'fork_from_shared_post': False,
         'parent_message_id': 'client-created-root',
-        'model': 'gpt-5-mini',
+        'model': 'auto',
         'timezone_offset_min': -360,
         'timezone': 'Etc/GMT-6',
         'conversation_mode': {
@@ -887,7 +887,7 @@ async def chatgpt(model: str, prompt: str = "Hello") -> str:
             },
         ],
         'parent_message_id': 'client-created-root',
-        'model': 'gpt-5-mini',
+        'model': 'auto',
         'timezone_offset_min': -360,
         'timezone': 'Etc/GMT-6',
         'conversation_mode': {
@@ -914,12 +914,13 @@ async def chatgpt(model: str, prompt: str = "Hello") -> str:
     }
     
     data = requests.post('https://chatgpt.com/backend-anon/f/conversation', cookies=cookies, headers=headers, json=json_data).text
-
+    print(data)
 
 
 
     pattern = r'"v"\s*:\s*"(?!finished_successfully")((?:[^"\\]|\\.)*)"'
     raw_text = "".join(re.findall(pattern, data))
+    print(raw_text)
 
     try:
         # Декодируем escape-последовательности
