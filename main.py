@@ -139,7 +139,7 @@ class ContactRequest(BaseModel):
 # --- GEMINI CONFIGURATION ---
 GEMINI_AT_TOKEN = "AEHmXlFHoh5RHL7qO8Ao4ChoIRdO:1770644067829" # Из твоего кода
 
-INITIAL_COOKIES_DICT = cookies = {
+INITIAL_COOKIES_DICT = {
     '_gcl_au': '1.1.321804501.1769867681',
     '_ga': 'GA1.1.170156978.1769867682',
     'SID': 'g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y99h9WHWdR1wrd5ZqOwEwLwwACgYKARwSARESFQHGX2MiYDtBz6M4ZLr2o0VPzQmhhhoVAUF8yKoL1B25RPbKIRn8GzxuM2aZ0076',
@@ -261,11 +261,7 @@ async def gemini_chat(prompt: str, db: AsyncSession):
     
     # ИСПРАВЛЕНИЕ: Проверяем db_cookie.value и добавляем try-except на случай битых данных
     if db_cookie and db_cookie.value:
-        try:
-            cookies = pickle.loads(db_cookie.value)
-        except Exception:
-            # Если данные повреждены или не распикливаются, берем исходные
-            cookies = INITIAL_COOKIES_DICT
+        cookies = pickle.loads(db_cookie.value)
     else:
         cookies = INITIAL_COOKIES_DICT
 
@@ -1743,6 +1739,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
