@@ -779,7 +779,7 @@ async def chatgpt(model: str, prompt: str = "Hello") -> str:
         'action': 'next',
         'fork_from_shared_post': False,
         'parent_message_id': 'client-created-root',
-        'model': 'auto',
+        'model': 'gpt-5-mini',
         'timezone_offset_min': -360,
         'timezone': 'Etc/GMT-6',
         'conversation_mode': {
@@ -887,7 +887,7 @@ async def chatgpt(model: str, prompt: str = "Hello") -> str:
             },
         ],
         'parent_message_id': 'client-created-root',
-        'model': 'auto',
+        'model': 'gpt-5-mini',
         'timezone_offset_min': -360,
         'timezone': 'Etc/GMT-6',
         'conversation_mode': {
@@ -1717,6 +1717,7 @@ async def run_agent(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
