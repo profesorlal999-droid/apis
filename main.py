@@ -110,6 +110,27 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+
+# Добавить новые схемы для POST запросов
+class GPTRequest(BaseModel):
+    key: str
+    model: str
+    prompt: str = "Test prompt"
+
+class GeminiRequest(BaseModel):
+    key: str
+    prompt: str = "Hello"
+
+class ImageGenRequest(BaseModel):
+    key: str
+    prompt: str
+
+class AgentRequest(BaseModel):
+    key: str
+    prompt: str = "Hello"
+    stream: Optional[bool] = False
+
+
 class KeyCreate(BaseModel):
     name: str
     limit: int
@@ -153,13 +174,13 @@ INITIAL_COOKIES_DICT = {
     '__Secure-3PAPISID': 'RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U',
     'COMPASS': 'gemini-pd=CjwACWuJV93jFYb_b6k1ZbZc5AVi75OXfwVJx6huPFdJgLZgT-iphNSBtyIyTho-2Gurv4U86El7hPmdVFUQi9P9ywYaXwAJa4lXLvbjFchc4_1pxVv6T7gLfJ2slxUaoulGsvyMeC-j3jnVGpAQWHeqydbFMC5a2ywGx3-W0RdB_hYBOblB5Xvwosrkr3XM_QPpkWQE1U1ZEPyUNCch4_659F_JIAEwAQ',
     'NID': '528=DQep5s2lC56R1bjm9M5KYYLbNH86Bcphuu6IFUCzh9J74JxeiBjwGDN0kMzRXyh3lEtkBpf-S9xxOma3ZxG0fewk19A1XeyR8DGu1kJVIZiFG6WXClkS3DgJ5VjXOQVdOeW0oaGf8qahhEbXMMtI_n60kqUvxO0_IAlAjlokdG2ZhCNR7qF6iExzCpCLXzW6y2MltIFDokp5Ck6j4OD0NqXOXJFncVraQgE5Y3Z251Bv3Ie1Ijk8CnpatTz0L_Cy0phh9jfcqWOWSKFwoFMndQUHI3ldgEeLEAfmhQ0dKJuX4_YmYoOlU-_VmwQ_PwDEjbwsb62EYfNu5RSKxlOkgH0V6YD9nJ4wZlbgyIIM29mWj2fQCeQ8NHF4kD9C0n_OV2dkU5dAInUSSrRtYyq1Fv9HmvqTWjYHzR_YdvOqYWyaMvE26eUSQnQZNEwlOufhU9cprJ7iy3r-CC1EOdvvtejoZkvfK5Z4T89L7mYLYDGd5a1PBVWnZw17QMwySeXZy847GPD3UN3urVAr4eXR0MIqBWp3LG19pGMgIise-7YRE6kf4mXKttoioSxYt5tUA1qjewK0y38EyUDJLDi6eB7zTjNzY1jwgra2MfkfpPgSHe5FarMe2ja0tKC-7vKhImxxvy9NxCWfSi9NzcUp8osD',
-    '_ga_WC57KJ50ZZ': 'GS2.1.s1770640488$o3$g1$t1770643533$j53$l0$h0',
-    '_ga_BF8Q35BMLM': 'GS2.1.s1770643528$o4$g1$t1770643533$j55$l0$h0',
-    '__Secure-1PSIDTS': 'sidts-CjIB7I_69ALsaQyWLizijrgYH5yUJUPqXyg4xwvMF5wKWPGdia93_VzAFaYPuTQAxjhQpBAA',
-    '__Secure-3PSIDTS': 'sidts-CjIB7I_69ALsaQyWLizijrgYH5yUJUPqXyg4xwvMF5wKWPGdia93_VzAFaYPuTQAxjhQpBAA',
-    'SIDCC': 'AKEyXzUliS-lbiT-tTKsEP2yM1S3wz6qvY_Yb9MMiKuxiKphazvsJ2YfFl9AnEk8mnKzIBqO9dU',
-    '__Secure-1PSIDCC': 'AKEyXzVL9ca2uhjwHicMH2FBiW60I0QVdUo-RVjhBpb6dhNZDXaZnBu4fZnf4rZYvkM8HU_Htg',
-    '__Secure-3PSIDCC': 'AKEyXzXjAZy8tsHybpYW1WZ2TiBL3g1SDK5g0AAWV3awOKBRxxTfT09MyJcX4V690glpgAaWUg0',
+    '__Secure-1PSIDTS': 'sidts-CjIB7I_69H_b9DTcOlsA5n7cE_e3H3audRZMGtl6d6VNaTTgZpSZ3z875HU6ALwgxHo4yRAA',
+    '__Secure-3PSIDTS': 'sidts-CjIB7I_69H_b9DTcOlsA5n7cE_e3H3audRZMGtl6d6VNaTTgZpSZ3z875HU6ALwgxHo4yRAA',
+    '_ga_BF8Q35BMLM': 'GS2.1.s1770640489$o3$g1$t1770640850$j60$l0$h0',
+    '_ga_WC57KJ50ZZ': 'GS2.1.s1770640488$o3$g1$t1770640852$j56$l0$h0',
+    'SIDCC': 'AKEyXzUC9gKuZipB6JCYGCSk2Yann6TlFBkO2xJtFR2jcdlgdk4KiNt12xfv7WCvDSpb34eNufA',
+    '__Secure-1PSIDCC': 'AKEyXzWkVu0xPs3zDhWQTwpjGub3DPVCMurzNDoVjYdyCTMRewWu1TnT8-A9s-BED_7S4j72DQ',
+    '__Secure-3PSIDCC': 'AKEyXzVsyLErRAPkSV4VTPaHCCx9lIPgdviBGj1ibdIvk_fTIm3LwNqTPwwO7ml49fFr7Y76UWA',
 }
 
 GEMINI_HEADERS = {
@@ -189,9 +210,10 @@ GEMINI_HEADERS = {
     'x-browser-validation': '5sIVVtVmIdhoPXzr4AHI3aD5P60=',
     'x-browser-year': '1969',
     'x-goog-ext-525001261-jspb': '[1,null,null,null,"fbb127bbb056c959",null,null,0,[4],null,null,1]',
-    'x-goog-ext-525005358-jspb': '["ED53673B-A558-4D19-AD0C-5FC51BD44B6A",1]',
+    'x-goog-ext-525005358-jspb': '["F6B9C989-9359-4406-B6F2-248D0174129A",1]',
     'x-goog-ext-73010989-jspb': '[0]',
-    'x-same-domain': '1'
+    'x-same-domain': '1',
+    # 'cookie': '_gcl_au=1.1.321804501.1769867681; _ga=GA1.1.170156978.1769867682; SID=g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y99h9WHWdR1wrd5ZqOwEwLwwACgYKARwSARESFQHGX2MiYDtBz6M4ZLr2o0VPzQmhhhoVAUF8yKoL1B25RPbKIRn8GzxuM2aZ0076; __Secure-1PSID=g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y9U0pAz-3TkC5ksCp0GItjJQACgYKAZsSARESFQHGX2MiyKFZwheb1FGfoBQTTQXvqxoVAUF8yKp0KI6Nqs3RFCwX07VjyDCN0076; __Secure-3PSID=g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y9jLMfSj7c9OlNwf0nD1AcpAACgYKASESARESFQHGX2Mi5iiHy2LFdBngPR300nkt_RoVAUF8yKqVcIDOjuqJFtziGWdgNkRI0076; HSID=Ah9YeSisMyhI6WIqA; SSID=AhHdOe0c5RcKS_O8j; APISID=xuothCntUVVWgUcw/Aq2XPdx7sNWWdO85m; SAPISID=RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U; __Secure-1PAPISID=RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U; __Secure-3PAPISID=RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U; COMPASS=gemini-pd=CjwACWuJV93jFYb_b6k1ZbZc5AVi75OXfwVJx6huPFdJgLZgT-iphNSBtyIyTho-2Gurv4U86El7hPmdVFUQi9P9ywYaXwAJa4lXLvbjFchc4_1pxVv6T7gLfJ2slxUaoulGsvyMeC-j3jnVGpAQWHeqydbFMC5a2ywGx3-W0RdB_hYBOblB5Xvwosrkr3XM_QPpkWQE1U1ZEPyUNCch4_659F_JIAEwAQ; NID=528=DQep5s2lC56R1bjm9M5KYYLbNH86Bcphuu6IFUCzh9J74JxeiBjwGDN0kMzRXyh3lEtkBpf-S9xxOma3ZxG0fewk19A1XeyR8DGu1kJVIZiFG6WXClkS3DgJ5VjXOQVdOeW0oaGf8qahhEbXMMtI_n60kqUvxO0_IAlAjlokdG2ZhCNR7qF6iExzCpCLXzW6y2MltIFDokp5Ck6j4OD0NqXOXJFncVraQgE5Y3Z251Bv3Ie1Ijk8CnpatTz0L_Cy0phh9jfcqWOWSKFwoFMndQUHI3ldgEeLEAfmhQ0dKJuX4_YmYoOlU-_VmwQ_PwDEjbwsb62EYfNu5RSKxlOkgH0V6YD9nJ4wZlbgyIIM29mWj2fQCeQ8NHF4kD9C0n_OV2dkU5dAInUSSrRtYyq1Fv9HmvqTWjYHzR_YdvOqYWyaMvE26eUSQnQZNEwlOufhU9cprJ7iy3r-CC1EOdvvtejoZkvfK5Z4T89L7mYLYDGd5a1PBVWnZw17QMwySeXZy847GPD3UN3urVAr4eXR0MIqBWp3LG19pGMgIise-7YRE6kf4mXKttoioSxYt5tUA1qjewK0y38EyUDJLDi6eB7zTjNzY1jwgra2MfkfpPgSHe5FarMe2ja0tKC-7vKhImxxvy9NxCWfSi9NzcUp8osD; _ga_WC57KJ50ZZ=GS2.1.s1770640488$o3$g0$t1770640488$j60$l0$h0; _ga_BF8Q35BMLM=GS2.1.s1770640489$o3$g0$t1770640489$j60$l0$h0; __Secure-1PSIDTS=sidts-CjIB7I_69H_b9DTcOlsA5n7cE_e3H3audRZMGtl6d6VNaTTgZpSZ3z875HU6ALwgxHo4yRAA; __Secure-3PSIDTS=sidts-CjIB7I_69H_b9DTcOlsA5n7cE_e3H3audRZMGtl6d6VNaTTgZpSZ3z875HU6ALwgxHo4yRAA; SIDCC=AKEyXzX1YnbubAApeX8vOlPADfoF4FqeipkwadWMpI0RrgmFY6UcUbAXYBOY7sgMQC-rl-BPFlU; __Secure-1PSIDCC=AKEyXzXT3eWU6fmqhTVk38OHIm84tPkuPa-DFJTu91iarQ3CVZuPWETO7cTcI8QFfHcHPvXk0g; __Secure-3PSIDCC=AKEyXzX_r7luRd0GVufSynaaNhOVbomHMKBQVBZA7_wiPZzH53PaXjrtYJLBVDZtICfjh2qbj9E',
 }
 
 # --- ФУНКЦИИ GEMINI ---
@@ -209,9 +231,9 @@ def _sync_gemini_request(message_text, cookies):
 
     params = {
         'bl': 'boq_assistant-bard-web-server_20260204.08_p0',
-        'f.sid': '-2947258359313026585',
+        'f.sid': '82734954708413835',
         'hl': 'ru',
-        '_reqid': '2969933',
+        '_reqid': '2866888',
         'rt': 'c',
     }
 
@@ -230,7 +252,6 @@ def _sync_gemini_request(message_text, cookies):
 
 def parse_gemini_response(raw_text):
     if not raw_text: return None
-    print(raw_text)
     lines = raw_text.split('\n')
     final_text = ""
     for line in lines:
@@ -261,7 +282,11 @@ async def gemini_chat(prompt: str, db: AsyncSession):
     
     # ИСПРАВЛЕНИЕ: Проверяем db_cookie.value и добавляем try-except на случай битых данных
     if db_cookie and db_cookie.value:
-        cookies = pickle.loads(db_cookie.value)
+        try:
+            cookies = pickle.loads(db_cookie.value)
+        except Exception:
+            # Если данные повреждены или не распикливаются, берем исходные
+            cookies = INITIAL_COOKIES_DICT
     else:
         cookies = INITIAL_COOKIES_DICT
 
@@ -292,44 +317,46 @@ async def gemini_chat(prompt: str, db: AsyncSession):
 
 
 # --- GEMINI IMAGE CONFIGURATION ---
-IMAGEN_AT_TOKEN = "AEHmXlHn02FySee67R3nv0RLL3wI:1770646003604"
-IMAGEN_F_SID = "4219334829824033336"
-IMAGEN_BL_SERVER = "boq_assistant-bard-web-server_20260204.08_p0"
+IMAGEN_AT_TOKEN = "AEHmXlEXuKlaeAWzQ-dHE5uMCPD6:1769906748197"
+IMAGEN_F_SID = "-5526697252036765155"
+IMAGEN_BL_SERVER = "boq_assistant-bard-web-server_20260128.03_p2"
 
 IMAGEN_INITIAL_COOKIES = {
-    '_gcl_au': '1.1.2010919010.1769724179',
-    '_ga': 'GA1.1.65427254.1769724180',
-    'NID': '528=WYATtTx4JRPlOQT2xAdV0SfLjz35ZMTegcweeHiCPY4kszt4zlOw3eAAWSua7TnITYA1-t_O1wF-dqL1bznVUVgHjY3ostMZZudnIk73uuCpPfsOj13XOszTw_V7F5fzx9ndEpH_DlsLaEYPOWaBItEmTacwpC6CuNXq7V9d5x8YurjK87Q00WFFD2-4EWlxseTPHtctp8DKVkUnFFjxKDzCfNjjl-bj-3Bajw-vOxgHeL8N_hj3gDBak4emHXuwNS8tlu5zWEDJjOOfg9XHwq5YxSVbQN04L30Rt0wxxwqRYq1vhlkmYg8eVx6_MevAC_I2Erg_BpJqfPZpm6QdPJ13OP4OAfUHrYo7G-ksI1-lQu0pOEPKkLJ6KcLXxQCkFrbs9xnO_jaG1vlNAPo7vRgszW08ke0T16fdd_ooD2oxkr6asVIzfl2S_tT1ki249M_rRvJ2SfnGSmloPbGbz3Wkgb4I4FiJR_dPuiQYHRX-vFX92cWfCPuJkVHTSgQowcNEDTlKo5MJcoz88tbP3l16gPwc2gvp6OnCcynpORFMzOxZPsJunJqqAHKKY22Kc5RkGGYSF1PK9XBXfgiFlkVJv9gH3a9SPW0LPM-_6V03z-c8XbN3AEifm5gwMbpR1tYbRoJG0pNcdoHgLU-6QQ',
-    'SID': 'g.a0006gjhbWH_l4FkqlkWWXGcJmWWiRS8C-CrFbYRNht80Wce4p_cCYU9fqyx9ccKrR6H8C5dQgACgYKAWUSARQSFQHGX2MigNNHzj8YCYMgyZsJf6gk7BoVAUF8yKpKybfXD3O7KsN3Q9ITvE_40076',
-    '__Secure-1PSID': 'g.a0006gjhbWH_l4FkqlkWWXGcJmWWiRS8C-CrFbYRNht80Wce4p_c7o2JRzDRELm_KCAbmgRfkwACgYKASMSARQSFQHGX2MilJEYzHDsTHEsCGpgy4XLsBoVAUF8yKp2IRt1RN3ddl3BxgtErdp20076',
-    '__Secure-3PSID': 'g.a0006gjhbWH_l4FkqlkWWXGcJmWWiRS8C-CrFbYRNht80Wce4p_cIxHLU7GdHIrVq4IEC1jkfQACgYKAV8SARQSFQHGX2MiGl4ulyWiHLwgwgMhQW57bxoVAUF8yKqLfncTGhg-M70087-ULeKI0076',
-    'HSID': 'A1_kmO0yoCn9IdfeM',
-    'SSID': 'AurqrD4LQA8HGRgKr',
-    'APISID': 'SKABWoA6qrqb75kG/A7t8EMxyaTIXP8Unu',
-    'SAPISID': '53LMi2vZ6qBSVK42/AZUUUA2lUct1eZvWw',
-    '__Secure-1PAPISID': '53LMi2vZ6qBSVK42/AZUUUA2lUct1eZvWw',
-    '__Secure-3PAPISID': '53LMi2vZ6qBSVK42/AZUUUA2lUct1eZvWw',
-    '__Secure-1PSIDTS': 'sidts-CjEB7I_69CSY0ePY4IsUfkV-4OvPexrlZU8-iKx4wDvyF9FIzij6rR-N5OZAWNJK8GjIEAA',
-    '__Secure-3PSIDTS': 'sidts-CjEB7I_69CSY0ePY4IsUfkV-4OvPexrlZU8-iKx4wDvyF9FIzij6rR-N5OZAWNJK8GjIEAA',
-    '_ga_BF8Q35BMLM': 'GS2.1.s1770642357$o3$g1$t1770642423$j60$l0$h0',
-    '_ga_WC57KJ50ZZ': 'GS2.1.s1770642355$o3$g1$t1770642423$j59$l0$h0',
-    'SIDCC': 'AKEyXzUNSlSVB-3KMt_yTIBWmh1D72STtd_wzLrZQfhYlwl7Wt7Y-vE8iuC-Ef6_Bqkh7bXC',
-    '__Secure-1PSIDCC': 'AKEyXzVAq6OH-XNohypwtBF0FPHjF1mGI6S-KTUqgqDoZXUQ73dBNjSQ4RPPYM8ktZE4LbyX',
-    '__Secure-3PSIDCC': 'AKEyXzXJGs5EAOaQRq6MJM0okUA6QN_kl8i8ALkm8fuMgl2AK51ecSP56lKpR4vY8K1OOQut',
+    '_gcl_au': '1.1.321804501.1769867681',
+    '_ga': 'GA1.1.170156978.1769867682',
+    'SID': 'g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y99h9WHWdR1wrd5ZqOwEwLwwACgYKARwSARESFQHGX2MiYDtBz6M4ZLr2o0VPzQmhhhoVAUF8yKoL1B25RPbKIRn8GzxuM2aZ0076',
+    '__Secure-1PSID': 'g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y9U0pAz-3TkC5ksCp0GItjJQACgYKAZsSARESFQHGX2MiyKFZwheb1FGfoBQTTQXvqxoVAUF8yKp0KI6Nqs3RFCwX07VjyDCN0076',
+    '__Secure-3PSID': 'g.a0006QjXizp8jo3Gc0Of5kjZV2Md2EWGK6QEcrJetAWXraNkI_Y9jLMfSj7c9OlNwf0nD1AcpAACgYKASESARESFQHGX2Mi5iiHy2LFdBngPR300nkt_RoVAUF8yKqVcIDOjuqJFtziGWdgNkRI0076',
+    'HSID': 'Ah9YeSisMyhI6WIqA',
+    'SSID': 'AhHdOe0c5RcKS_O8j',
+    'APISID': 'xuothCntUVVWgUcw/Aq2XPdx7sNWWdO85m',
+    'SAPISID': 'RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U',
+    '__Secure-1PAPISID': 'RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U',
+    '__Secure-3PAPISID': 'RWzy4FADoAFzO-oD/AiswpUkRdFazLFo0U',
+    'COMPASS': 'gemini-pd=CjwACWuJV93jFYb_b6k1ZbZc5AVi75OXfwVJx6huPFdJgLZgT-iphNSBtyIyTho-2Gurv4U86El7hPmdVFUQi9P9ywYaXwAJa4lXLvbjFchc4_1pxVv6T7gLfJ2slxUaoulGsvyMeC-j3jnVGpAQWHeqydbFMC5a2ywGx3-W0RdB_hYBOblB5Xvwosrkr3XM_QPpkWQE1U1ZEPyUNCch4_659F_JIAEwAQ',
+    'NID': '528=by5du2Dtn531lheJBkzTPaI5AmjuzG_sSTaEmSxliY3Q4H3e4iivfMxOSLVqdQzFUaYi52trqVmqBFA9XJ2c7bgWpi6EKme9uppeU2gIalI25LC53Fh5olyCY_qs8q-pl31TPokrsLupt4GDAaUVw9YZJaufwui35Knp4wZuUpGKof8u39i8IYiLGwu6Sq_p6cDh2ND7wKDlPu35YZQht9Z-x-oD5thx9uPHTspFVPGsgY2Sk2wW7DTU5XrSmoR_lrcjpGYK8n1QBVUEGJ5rR7tdfBwiZJW-B3tAhr_nK4mQlySc6Cc9lBaq6Gcbufr22rOgqB2dTF7nOZGzjuqm2wv8koxsDx3IG7Wn2VQZFlP7KPG3vDqQ-O9iIRsLHHfZvkSuvKL3IlyrjJ9aCDURlgpi7ZpRIlpHLQZLt_YmbMafqoFraFxA_30rYpED_4WTzICUny0S2FjdvYiKy-z-UlGAup6tlUWiq2xN8Dv5fpOhW5TC-p6rhoSUQBScUpnzh54xLuO147_KA8JmFbW_oZjZ9JfU87D8y4tqs3-ujKCAkR_f9w9_ElyoDqRA6Myc-6mL3moYPRS_ndeSuvIu51urDd2M4zGP2jIwCmtGweW2hFmduzlNgLKdqa3V1ZK3RgWDvXKflgKaQiuj',
+    '_ga_WC57KJ50ZZ': 'GS2.1.s1769903163$o2$g0$t1769903163$j60$l0$h0',
+    '_ga_BF8Q35BMLM': 'GS2.1.s1769903163$o2$g0$t1769903163$j60$l0$h0',
+    '__Secure-1PSIDTS': 'sidts-CjIB7I_69ACI_ut9anc9-3DvYGxAP7aLbWzxw1vz8TdZWEHdiCnApClDhbyS20HzCy_rOhAA',
+    '__Secure-3PSIDTS': 'sidts-CjIB7I_69ACI_ut9anc9-3DvYGxAP7aLbWzxw1vz8TdZWEHdiCnApClDhbyS20HzCy_rOhAA',
+    'SIDCC': 'AKEyXzXkWnAWjbBPxa-NJml1Dg2CaJGsLa6-YVyh0A4qSHm0FOTG__2UCimtxGTSdlLp-XwatQ',
+    '__Secure-1PSIDCC': 'AKEyXzU2f-QfwX_0FtLkuU9VJxohGyg36to4nWf1FffevCChFWu0uVQ9OtV1ybcvLjJCoBfw',
+    '__Secure-3PSIDCC': 'AKEyXzXpYZORco20KCQZf1Qoe_NWRWTFr1TgpvpZEL6qyMOp9UHkHfXCdCAPeiBWaNsgj3M4Tg',
 }
+
 IMAGEN_HEADERS = {
     'accept': '*/*',
-    'accept-language': 'ru,en;q=0.9',
+    'accept-language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7',
     'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
     'origin': 'https://gemini.google.com',
     'priority': 'u=1, i',
     'referer': 'https://gemini.google.com/',
-    'sec-ch-ua': '"Not_A Brand";v="99", "Chromium";v="142"',
+    'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
     'sec-ch-ua-arch': '"x86"',
     'sec-ch-ua-bitness': '"64"',
     'sec-ch-ua-form-factors': '"Desktop"',
-    'sec-ch-ua-full-version': '"142.0.7444.265"',
-    'sec-ch-ua-full-version-list': '"Not_A Brand";v="99.0.0.0", "Chromium";v="142.0.7444.1126"',
+    'sec-ch-ua-full-version': '"144.0.7559.110"',
+    'sec-ch-ua-full-version-list': '"Not(A:Brand";v="8.0.0.0", "Chromium";v="144.0.7559.110", "Google Chrome";v="144.0.7559.110"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-model': '""',
     'sec-ch-ua-platform': '"Windows"',
@@ -338,12 +365,15 @@ IMAGEN_HEADERS = {
     'sec-fetch-dest': 'empty',
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+    'x-browser-channel': 'stable',
+    'x-browser-copyright': 'Copyright 2025 Google LLC. All rights reserved.',
+    'x-browser-validation': '5sIVVtVmIdhoPXzr4AHI3aD5P60=',
+    'x-browser-year': '1969',
     'x-goog-ext-525001261-jspb': '[1,null,null,null,"fbb127bbb056c959",null,null,0,[4],null,null,1]',
-    'x-goog-ext-525005358-jspb': '["2F2EF3BB-1236-422C-9C75-E39CBEBF243D",1]',
+    'x-goog-ext-525005358-jspb': '["D98A3EE2-30BA-491D-9A23-0D4BAE17ACE8",1]',
     'x-goog-ext-73010989-jspb': '[0]',
-    'x-same-domain': '1',
-    # 'cookie': '_gcl_au=1.1.2010919010.1769724179; _ga=GA1.1.65427254.1769724180; NID=528=WYATtTx4JRPlOQT2xAdV0SfLjz35ZMTegcweeHiCPY4kszt4zlOw3eAAWSua7TnITYA1-t_O1wF-dqL1bznVUVgHjY3ostMZZudnIk73uuCpPfsOj13XOszTw_V7F5fzx9ndEpH_DlsLaEYPOWaBItEmTacwpC6CuNXq7V9d5x8YurjK87Q00WFFD2-4EWlxseTPHtctp8DKVkUnFFjxKDzCfNjjl-bj-3Bajw-vOxgHeL8N_hj3gDBak4emHXuwNS8tlu5zWEDJjOOfg9XHwq5YxSVbQN04L30Rt0wxxwqRYq1vhlkmYg8eVx6_MevAC_I2Erg_BpJqfPZpm6QdPJ13OP4OAfUHrYo7G-ksI1-lQu0pOEPKkLJ6KcLXxQCkFrbs9xnO_jaG1vlNAPo7vRgszW08ke0T16fdd_ooD2oxkr6asVIzfl2S_tT1ki249M_rRvJ2SfnGSmloPbGbz3Wkgb4I4FiJR_dPuiQYHRX-vFX92cWfCPuJkVHTSgQowcNEDTlKo5MJcoz88tbP3l16gPwc2gvp6OnCcynpORFMzOxZPsJunJqqAHKKY22Kc5RkGGYSF1PK9XBXfgiFlkVJv9gH3a9SPW0LPM-_6V03z-c8XbN3AEifm5gwMbpR1tYbRoJG0pNcdoHgLU-6QQ; SID=g.a0006gjhbWH_l4FkqlkWWXGcJmWWiRS8C-CrFbYRNht80Wce4p_cCYU9fqyx9ccKrR6H8C5dQgACgYKAWUSARQSFQHGX2MigNNHzj8YCYMgyZsJf6gk7BoVAUF8yKpKybfXD3O7KsN3Q9ITvE_40076; __Secure-1PSID=g.a0006gjhbWH_l4FkqlkWWXGcJmWWiRS8C-CrFbYRNht80Wce4p_c7o2JRzDRELm_KCAbmgRfkwACgYKASMSARQSFQHGX2MilJEYzHDsTHEsCGpgy4XLsBoVAUF8yKp2IRt1RN3ddl3BxgtErdp20076; __Secure-3PSID=g.a0006gjhbWH_l4FkqlkWWXGcJmWWiRS8C-CrFbYRNht80Wce4p_cIxHLU7GdHIrVq4IEC1jkfQACgYKAV8SARQSFQHGX2MiGl4ulyWiHLwgwgMhQW57bxoVAUF8yKqLfncTGhg-M70087-ULeKI0076; HSID=A1_kmO0yoCn9IdfeM; SSID=AurqrD4LQA8HGRgKr; APISID=SKABWoA6qrqb75kG/A7t8EMxyaTIXP8Unu; SAPISID=53LMi2vZ6qBSVK42/AZUUUA2lUct1eZvWw; __Secure-1PAPISID=53LMi2vZ6qBSVK42/AZUUUA2lUct1eZvWw; __Secure-3PAPISID=53LMi2vZ6qBSVK42/AZUUUA2lUct1eZvWw; __Secure-1PSIDTS=sidts-CjEB7I_69CSY0ePY4IsUfkV-4OvPexrlZU8-iKx4wDvyF9FIzij6rR-N5OZAWNJK8GjIEAA; __Secure-3PSIDTS=sidts-CjEB7I_69CSY0ePY4IsUfkV-4OvPexrlZU8-iKx4wDvyF9FIzij6rR-N5OZAWNJK8GjIEAA; _ga_BF8Q35BMLM=GS2.1.s1770642357$o3$g1$t1770642423$j60$l0$h0; _ga_WC57KJ50ZZ=GS2.1.s1770642355$o3$g1$t1770642423$j59$l0$h0; SIDCC=AKEyXzUNSlSVB-3KMt_yTIBWmh1D72STtd_wzLrZQfhYlwl7Wt7Y-vE8iuC-Ef6_Bqkh7bXC; __Secure-1PSIDCC=AKEyXzVAq6OH-XNohypwtBF0FPHjF1mGI6S-KTUqgqDoZXUQ73dBNjSQ4RPPYM8ktZE4LbyX; __Secure-3PSIDCC=AKEyXzXJGs5EAOaQRq6MJM0okUA6QN_kl8i8ALkm8fuMgl2AK51ecSP56lKpR4vY8K1OOQut',
+    'x-same-domain': '1'
 }
 
 
@@ -1254,13 +1284,8 @@ async def delete_key(key_id: int, user: User = Depends(get_current_user), db: As
     await db.commit()
     return {"status": "deleted"}
 
-@app.get("/api/run/gpt")
-async def run_gpt_via_link(
-    key: str, 
-    model: str, 
-    prompt: str = "Test prompt", 
-    db: AsyncSession = Depends(get_db)
-):
+# --- GPT LOGIC & HANDLERS ---
+async def process_gpt(key: str, model: str, prompt: str, db: AsyncSession):
     # 1. Поиск ключа и пользователя
     stmt = select(APIKey).where(APIKey.key_hash == key)
     result = await db.execute(stmt)
@@ -1275,45 +1300,36 @@ async def run_gpt_via_link(
     if not user:
         raise HTTPException(status_code=403, detail="USER NOT FOUND")
 
-
     has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
 
-    # 2. Предварительная проверка баланса
-    # Мы пока не знаем точную цену, но если баланс <= 0, отклоняем запрос сразу.
     if not has_unlimited and user.tokens_balance <= 0:
         raise HTTPException(status_code=402, detail="INSUFFICIENT GLOBAL BALANCE")
     
     if api_key_obj.limit_tokens <= 0:
         raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
 
-    # 3. Выполнение генерации
-    # Сначала получаем ответ от нейросети
+    # 3. Генерация
     ai_response = await chatgpt(model=model, prompt=prompt)
 
-    # 4. Подсчет токенов (Запрос + Ответ)
-    # Запускаем подсчет параллельно или последовательно
+    # 4. Подсчет и списание
     input_tokens = await get_token_count(prompt)
-  
-
     output_tokens = await get_token_count(ai_response)
-    
     total_cost = input_tokens["tokenCount"] + output_tokens["tokenCount"]
 
-    # 5. Списание средств
-    # Списываем фактическую стоимость. Баланс может уйти в небольшой минус,
-    # если токенов было впритык — это нормальная практика.
-    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
     if not has_unlimited:
         user.tokens_balance -= total_cost 
     api_key_obj.limit_tokens -= total_cost 
     
     await db.commit()
-
-    # (Опционально) Можно добавить в логи или вернуть в заголовках стоимость
-    print(f"GPT Cost: {total_cost} tokens (In: {input_tokens}, Out: {output_tokens})")
-
-    # 6. Возврат ответа
     return ai_response
+
+@app.get("/api/run/gpt")
+async def run_gpt_get(key: str, model: str, prompt: str = "Test prompt", db: AsyncSession = Depends(get_db)):
+    return await process_gpt(key, model, prompt, db)
+
+@app.post("/api/run/gpt")
+async def run_gpt_post(req: GPTRequest, db: AsyncSession = Depends(get_db)):
+    return await process_gpt(req.key, req.model, req.prompt, db)
 # --- AUTODRAW ENDPOINTS ---
 
 @app.post("/api/run/autodraw/predict")
@@ -1470,13 +1486,8 @@ async def get_autodraw_icon(
 
     # Возвращаем сам SVG контент
     return Response(content=resp.text, media_type="image/svg+xml")
-@app.get("/api/run/gemini")
-async def run_gemini(
-    key: str, 
-    prompt: str = "Hello", 
-    db: AsyncSession = Depends(get_db)
-):
-    # 1. Проверка API ключа и баланса
+# --- GEMINI LOGIC & HANDLERS ---
+async def process_gemini(key: str, prompt: str, db: AsyncSession):
     stmt = select(APIKey).where(APIKey.key_hash == key)
     result = await db.execute(stmt)
     api_key_obj = result.scalar_one_or_none()
@@ -1486,27 +1497,24 @@ async def run_gemini(
 
     user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
     user = user_result.scalar_one_or_none()
-    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+    
     if not user:
         raise HTTPException(status_code=402, detail="USER NOT FOUND")
         
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+    
     if not has_unlimited and user.tokens_balance <= 0:
         raise HTTPException(status_code=402, detail="INSUFFICIENT FUNDS")
         
     if api_key_obj.limit_tokens <= 0:
         raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
 
-    # 2. Вызов Gemini
     ai_response = await gemini_chat(prompt, db)
     
     input_tokens = await get_token_count(prompt)
     output_tokens = await get_token_count(ai_response)
-
-    # 3. Списание средств (условно 100 токенов за запрос, т.к. токенайзер Gemini сложнее)
     COST = input_tokens['tokenCount'] + output_tokens['tokenCount']
-    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
 
-    # Списание средств
     if not has_unlimited:
         user.tokens_balance -= COST
     api_key_obj.limit_tokens -= COST
@@ -1514,17 +1522,18 @@ async def run_gemini(
 
     return ai_response
 
+@app.get("/api/run/gemini")
+async def run_gemini_get(key: str, prompt: str = "Hello", db: AsyncSession = Depends(get_db)):
+    return await process_gemini(key, prompt, db)
 
-@app.get("/api/run/image")
-async def run_gemini_image(
-    key: str,
-    prompt: str,
-    db: AsyncSession = Depends(get_db)
-):
-    # Стоимость генерации картинки (дороже текста)
+@app.post("/api/run/gemini")
+async def run_gemini_post(req: GeminiRequest, db: AsyncSession = Depends(get_db)):
+    return await process_gemini(req.key, req.prompt, db)
+
+
+# --- IMAGE LOGIC & HANDLERS ---
+async def process_image(key: str, prompt: str, db: AsyncSession):
     COST = 500 
-
-    # 1. Проверка API ключа
     stmt = select(APIKey).where(APIKey.key_hash == key)
     result = await db.execute(stmt)
     api_key_obj = result.scalar_one_or_none()
@@ -1534,7 +1543,6 @@ async def run_gemini_image(
 
     user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
     user = user_result.scalar_one_or_none()
-
     has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
 
     if not has_unlimited and user.tokens_balance < COST:
@@ -1543,26 +1551,25 @@ async def run_gemini_image(
     if api_key_obj.limit_tokens < COST:
         raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
 
-    # 3. Запуск генерации
-    # Промпт уже модифицируется внутри функции (добавляется "Generate image: ")
-    result = await generate_gemini_image_async(prompt, db)
+    result_data = await generate_gemini_image_async(prompt, db)
     
-    if "error" in result:
-        # Если ошибка Gemini, деньги не списываем, возвращаем 500
-        raise HTTPException(status_code=500, detail=result["error"])
+    if "error" in result_data:
+        raise HTTPException(status_code=500, detail=result_data["error"])
 
-    # 4. Списание средств при успехе
-    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
-
-    # Списание средств
     if not has_unlimited:
         user.tokens_balance -= COST
     api_key_obj.limit_tokens -= COST
     await db.commit()
 
-    # 5. Возврат бинарного файла
-    # FastAPI Response позволяет вернуть bytes как файл
-    return Response(content=result["image"], media_type="image/jpeg")
+    return Response(content=result_data["image"], media_type="image/jpeg")
+
+@app.get("/api/run/image")
+async def run_image_get(key: str, prompt: str, db: AsyncSession = Depends(get_db)):
+    return await process_image(key, prompt, db)
+
+@app.post("/api/run/image")
+async def run_image_post(req: ImageGenRequest, db: AsyncSession = Depends(get_db)):
+    return await process_image(req.key, req.prompt, db)
 @app.post("/api/tokenize")
 async def tokenize_text_endpoint(
     req: TokenizeRequest,
@@ -1680,16 +1687,9 @@ async def kimi_stream_generator(prompt: str):
                     except:
                         pass
 
-@app.get("/api/run/agent")
-async def run_agent(
-    key: str, 
-    prompt: str = "Hello",
-    stream: bool = False, # Параметр управления режимом
-    db: AsyncSession = Depends(get_db)
-):
+# --- AGENT LOGIC & HANDLERS ---
+async def process_agent(key: str, prompt: str, stream: bool, db: AsyncSession):
     COST = 1500
-
-    # 1. Проверка ключа и баланса
     stmt = select(APIKey).where(APIKey.key_hash == key)
     result = await db.execute(stmt)
     api_key_obj = result.scalar_one_or_none()
@@ -1699,7 +1699,7 @@ async def run_agent(
 
     user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
     user = user_result.scalar_one_or_none()
-
+    
     if not user:
         raise HTTPException(status_code=403, detail="USER NOT FOUND")
 
@@ -1711,39 +1711,38 @@ async def run_agent(
     if api_key_obj.limit_tokens < COST:
         raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
 
-    # 2. Списание средств
     if not has_unlimited:
         user.tokens_balance -= COST
     api_key_obj.limit_tokens -= COST
     await db.commit()
 
-    # 3. Логика ответа
     generator = kimi_stream_generator(prompt)
 
     if stream:
-        # Режим Streaming: отдаем байты по мере поступления (text/plain)
         return StreamingResponse(generator, media_type="text/plain")
     else:
-        # Режим ожидания: собираем всё в одну строку (JSON)
         full_text = ""
         try:
             async for chunk in generator:
                 full_text += chunk
         except Exception as e:
             return JSONResponse(status_code=500, content={"error": str(e)})
-            
         return full_text
+
+@app.get("/api/run/agent")
+async def run_agent_get(key: str, prompt: str = "Hello", stream: bool = False, db: AsyncSession = Depends(get_db)):
+    return await process_agent(key, prompt, stream, db)
+
+@app.post("/api/run/agent")
+async def run_agent_post(req: AgentRequest, db: AsyncSession = Depends(get_db)):
+    # Обратите внимание: Pydantic модель AgentRequest уже содержит stream
+    return await process_agent(req.key, req.prompt, req.stream, db)
 
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
-
-
-
 
 
 
