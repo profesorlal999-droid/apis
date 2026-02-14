@@ -1605,21 +1605,41 @@ async def contact_form(
 KIMI_URL = "https://www.kimi.com/apiv2/kimi.gateway.chat.v1.ChatService/Chat"
 # (Заголовки и куки оставляем те же, что вы дали, или берем из env)
 KIMI_HEADERS = {
-    "accept": "*/*",
-    "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
-    "authorization": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MjY0MTAwMiwiaWF0IjoxNzcwMDQ5MDAyLCJqdGkiOiJkNjBjcnFuZnRhZTEzdmZ1OXJrZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDlna3YzYWNjNGZla2NyNGMyMCIsInNwYWNlX2lkIjoiZDQ5Z2t1cmFjYzRmZWtjcjQ5NmciLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5Z2t1cmFjYzRmZWtjcjQ5NjAiLCJzc2lkIjoiMTczMTQzNjE0NDY4NTE3MzUxOSIsImRldmljZV9pZCI6Ijc2MDIzMDIyNTM3ODUwODcyMzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0._Abf3gshAcVJjYAUkAm_zvgA9VPSP7MCeCy9CRvOnL6fgyt78DpJXq488TiRXNr6wCMh2srvP5XFvT4rxJyu4A",
-    "connect-protocol-version": "1",
-    "content-type": "application/connect+json",
-    "origin": "https://www.kimi.com",
-    "priority": "u=1, i",
-    "referer": "https://www.kimi.com/",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
-    "x-traffic-id": "d49gkv3acc4fekcr4c20"
+    'accept': '*/*',
+    'accept-language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7',
+    'authorization': 'Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MzY2MDU5MywiaWF0IjoxNzcxMDY4NTkzLCJqdGkiOiJkNjg1cGNhbTUydGNrdjk3MG04ZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDluMDU3NjByYTg1aWQyNXVxMCIsInNwYWNlX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OTAiLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OGciLCJzc2lkIjoiMTczMTQ0NDk0MDc4MTg4MTcwOCIsImRldmljZV9pZCI6Ijc2MDY2ODEzNjgwODAxNzk5NzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0.hWgwB-a8dJVxRyhE4g0CbIQZvPcaMr87aQhW2VWPPrLGgRTF3D6Gc3Rn9j5R-1Efg7pNylYtaLC96d_nLsZJkQ',
+    'connect-protocol-version': '1',
+    'content-type': 'application/connect+json',
+    'origin': 'https://www.kimi.com',
+    'priority': 'u=1, i',
+    'r-timezone': 'Etc/GMT-6',
+    'referer': 'https://www.kimi.com/',
+    'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Microsoft Edge";v="144"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36 Edg/144.0.0.0',
+    'x-language': 'en-US',
+    'x-msh-device-id': '7606681368080179972',
+    'x-msh-platform': 'web',
+    'x-msh-session-id': '1731444940781881708',
+    'x-msh-version': '1.0.0',
+    'x-traffic-id': 'd49n05760ra85id25uq0',
+    # 'cookie': 'Hm_lvt_358cae4815e85d48f7e8ab7f3680a74b=1771064928; HMACCOUNT=3241630D7884B388; _ga=GA1.1.1777180513.1771064928; _gcl_au=1.1.1709948898.1771064928; theme=light; __snaker__id=sCNSFXoZIU0lYulj; gdxidpyhxdE=SNkMp1KEeQke5LMjwuqOiOMNzu1K6hXIaZWRBSJTTTUS2sP1%2FPQU%2FZaI9DiY5HvQcuTP%2BG0y98Nsnkzml8ojOY73qrgA3Ga9mCo1tL96aYKxW53d%5CeStgV%2BwgO0f5L%5CRYsiWYTR6H%2FVzrXJ96%5Ceelr%2BTzIrmo%2BpV4Q8jHHMzdy5Vi1Oi%3A1771065874231; Hm_lpvt_358cae4815e85d48f7e8ab7f3680a74b=1771065011; kimi-auth=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MzY2MDU5MywiaWF0IjoxNzcxMDY4NTkzLCJqdGkiOiJkNjg1cGNhbTUydGNrdjk3MG04ZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDluMDU3NjByYTg1aWQyNXVxMCIsInNwYWNlX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OTAiLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OGciLCJzc2lkIjoiMTczMTQ0NDk0MDc4MTg4MTcwOCIsImRldmljZV9pZCI6Ijc2MDY2ODEzNjgwODAxNzk5NzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0.hWgwB-a8dJVxRyhE4g0CbIQZvPcaMr87aQhW2VWPPrLGgRTF3D6Gc3Rn9j5R-1Efg7pNylYtaLC96d_nLsZJkQ; _ga_YXD8W70SZP=GS2.1.s1771064927$o1$g1$t1771065013$j57$l0$h0',
 }
 KIMI_COOKIES = {
-    "_ga": "GA1.1.299926138.1770045335",
-    "theme": "dark",
-    "kimi-auth": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MjY0MTAwMiwiaWF0IjoxNzcwMDQ5MDAyLCJqdGkiOiJkNjBjcnFuZnRhZTEzdmZ1OXJrZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDlna3YzYWNjNGZla2NyNGMyMCIsInNwYWNlX2lkIjoiZDQ5Z2t1cmFjYzRmZWtjcjQ5NmciLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5Z2t1cmFjYzRmZWtjcjQ5NjAiLCJzc2lkIjoiMTczMTQzNjE0NDY4NTE3MzUxOSIsImRldmljZV9pZCI6Ijc2MDIzMDIyNTM3ODUwODcyMzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0._Abf3gshAcVJjYAUkAm_zvgA9VPSP7MCeCy9CRvOnL6fgyt78DpJXq488TiRXNr6wCMh2srvP5XFvT4rxJyu4A"
+    'Hm_lvt_358cae4815e85d48f7e8ab7f3680a74b': '1771064928',
+    'HMACCOUNT': '3241630D7884B388',
+    '_ga': 'GA1.1.1777180513.1771064928',
+    '_gcl_au': '1.1.1709948898.1771064928',
+    'theme': 'light',
+    '__snaker__id': 'sCNSFXoZIU0lYulj',
+    'gdxidpyhxdE': 'SNkMp1KEeQke5LMjwuqOiOMNzu1K6hXIaZWRBSJTTTUS2sP1%2FPQU%2FZaI9DiY5HvQcuTP%2BG0y98Nsnkzml8ojOY73qrgA3Ga9mCo1tL96aYKxW53d%5CeStgV%2BwgO0f5L%5CRYsiWYTR6H%2FVzrXJ96%5Ceelr%2BTzIrmo%2BpV4Q8jHHMzdy5Vi1Oi%3A1771065874231',
+    'Hm_lpvt_358cae4815e85d48f7e8ab7f3680a74b': '1771065011',
+    'kimi-auth': 'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MzY2MDU5MywiaWF0IjoxNzcxMDY4NTkzLCJqdGkiOiJkNjg1cGNhbTUydGNrdjk3MG04ZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDluMDU3NjByYTg1aWQyNXVxMCIsInNwYWNlX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OTAiLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OGciLCJzc2lkIjoiMTczMTQ0NDk0MDc4MTg4MTcwOCIsImRldmljZV9pZCI6Ijc2MDY2ODEzNjgwODAxNzk5NzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0.hWgwB-a8dJVxRyhE4g0CbIQZvPcaMr87aQhW2VWPPrLGgRTF3D6Gc3Rn9j5R-1Efg7pNylYtaLC96d_nLsZJkQ',
+    '_ga_YXD8W70SZP': 'GS2.1.s1771064927$o1$g1$t1771065013$j57$l0$h0',
 }
 
 
@@ -1743,6 +1763,7 @@ async def run_agent_post(req: AgentRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
