@@ -129,6 +129,10 @@ class AgentRequest(BaseModel):
     key: str
     prompt: str = "Hello"
     stream: Optional[bool] = False
+class OpenAIRequest(BaseModel):
+    key: str
+    prompt: str = "Hello"
+
 
 
 class KeyCreate(BaseModel):
@@ -1605,41 +1609,21 @@ async def contact_form(
 KIMI_URL = "https://www.kimi.com/apiv2/kimi.gateway.chat.v1.ChatService/Chat"
 # (Заголовки и куки оставляем те же, что вы дали, или берем из env)
 KIMI_HEADERS = {
-    'accept': '*/*',
-    'accept-language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7',
-    'authorization': 'Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MzY2MDU5MywiaWF0IjoxNzcxMDY4NTkzLCJqdGkiOiJkNjg1cGNhbTUydGNrdjk3MG04ZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDluMDU3NjByYTg1aWQyNXVxMCIsInNwYWNlX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OTAiLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OGciLCJzc2lkIjoiMTczMTQ0NDk0MDc4MTg4MTcwOCIsImRldmljZV9pZCI6Ijc2MDY2ODEzNjgwODAxNzk5NzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0.hWgwB-a8dJVxRyhE4g0CbIQZvPcaMr87aQhW2VWPPrLGgRTF3D6Gc3Rn9j5R-1Efg7pNylYtaLC96d_nLsZJkQ',
-    'connect-protocol-version': '1',
-    'content-type': 'application/connect+json',
-    'origin': 'https://www.kimi.com',
-    'priority': 'u=1, i',
-    'r-timezone': 'Etc/GMT-6',
-    'referer': 'https://www.kimi.com/',
-    'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Microsoft Edge";v="144"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36 Edg/144.0.0.0',
-    'x-language': 'en-US',
-    'x-msh-device-id': '7606681368080179972',
-    'x-msh-platform': 'web',
-    'x-msh-session-id': '1731444940781881708',
-    'x-msh-version': '1.0.0',
-    'x-traffic-id': 'd49n05760ra85id25uq0',
-    # 'cookie': 'Hm_lvt_358cae4815e85d48f7e8ab7f3680a74b=1771064928; HMACCOUNT=3241630D7884B388; _ga=GA1.1.1777180513.1771064928; _gcl_au=1.1.1709948898.1771064928; theme=light; __snaker__id=sCNSFXoZIU0lYulj; gdxidpyhxdE=SNkMp1KEeQke5LMjwuqOiOMNzu1K6hXIaZWRBSJTTTUS2sP1%2FPQU%2FZaI9DiY5HvQcuTP%2BG0y98Nsnkzml8ojOY73qrgA3Ga9mCo1tL96aYKxW53d%5CeStgV%2BwgO0f5L%5CRYsiWYTR6H%2FVzrXJ96%5Ceelr%2BTzIrmo%2BpV4Q8jHHMzdy5Vi1Oi%3A1771065874231; Hm_lpvt_358cae4815e85d48f7e8ab7f3680a74b=1771065011; kimi-auth=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MzY2MDU5MywiaWF0IjoxNzcxMDY4NTkzLCJqdGkiOiJkNjg1cGNhbTUydGNrdjk3MG04ZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDluMDU3NjByYTg1aWQyNXVxMCIsInNwYWNlX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OTAiLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OGciLCJzc2lkIjoiMTczMTQ0NDk0MDc4MTg4MTcwOCIsImRldmljZV9pZCI6Ijc2MDY2ODEzNjgwODAxNzk5NzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0.hWgwB-a8dJVxRyhE4g0CbIQZvPcaMr87aQhW2VWPPrLGgRTF3D6Gc3Rn9j5R-1Efg7pNylYtaLC96d_nLsZJkQ; _ga_YXD8W70SZP=GS2.1.s1771064927$o1$g1$t1771065013$j57$l0$h0',
+    "accept": "*/*",
+    "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+    "authorization": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MjY0MTAwMiwiaWF0IjoxNzcwMDQ5MDAyLCJqdGkiOiJkNjBjcnFuZnRhZTEzdmZ1OXJrZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDlna3YzYWNjNGZla2NyNGMyMCIsInNwYWNlX2lkIjoiZDQ5Z2t1cmFjYzRmZWtjcjQ5NmciLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5Z2t1cmFjYzRmZWtjcjQ5NjAiLCJzc2lkIjoiMTczMTQzNjE0NDY4NTE3MzUxOSIsImRldmljZV9pZCI6Ijc2MDIzMDIyNTM3ODUwODcyMzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0._Abf3gshAcVJjYAUkAm_zvgA9VPSP7MCeCy9CRvOnL6fgyt78DpJXq488TiRXNr6wCMh2srvP5XFvT4rxJyu4A",
+    "connect-protocol-version": "1",
+    "content-type": "application/connect+json",
+    "origin": "https://www.kimi.com",
+    "priority": "u=1, i",
+    "referer": "https://www.kimi.com/",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "x-traffic-id": "d49gkv3acc4fekcr4c20"
 }
 KIMI_COOKIES = {
-    'Hm_lvt_358cae4815e85d48f7e8ab7f3680a74b': '1771064928',
-    'HMACCOUNT': '3241630D7884B388',
-    '_ga': 'GA1.1.1777180513.1771064928',
-    '_gcl_au': '1.1.1709948898.1771064928',
-    'theme': 'light',
-    '__snaker__id': 'sCNSFXoZIU0lYulj',
-    'gdxidpyhxdE': 'SNkMp1KEeQke5LMjwuqOiOMNzu1K6hXIaZWRBSJTTTUS2sP1%2FPQU%2FZaI9DiY5HvQcuTP%2BG0y98Nsnkzml8ojOY73qrgA3Ga9mCo1tL96aYKxW53d%5CeStgV%2BwgO0f5L%5CRYsiWYTR6H%2FVzrXJ96%5Ceelr%2BTzIrmo%2BpV4Q8jHHMzdy5Vi1Oi%3A1771065874231',
-    'Hm_lpvt_358cae4815e85d48f7e8ab7f3680a74b': '1771065011',
-    'kimi-auth': 'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MzY2MDU5MywiaWF0IjoxNzcxMDY4NTkzLCJqdGkiOiJkNjg1cGNhbTUydGNrdjk3MG04ZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDluMDU3NjByYTg1aWQyNXVxMCIsInNwYWNlX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OTAiLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5bjA1NzYwcmE4NWlkMjV0OGciLCJzc2lkIjoiMTczMTQ0NDk0MDc4MTg4MTcwOCIsImRldmljZV9pZCI6Ijc2MDY2ODEzNjgwODAxNzk5NzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0.hWgwB-a8dJVxRyhE4g0CbIQZvPcaMr87aQhW2VWPPrLGgRTF3D6Gc3Rn9j5R-1Efg7pNylYtaLC96d_nLsZJkQ',
-    '_ga_YXD8W70SZP': 'GS2.1.s1771064927$o1$g1$t1771065013$j57$l0$h0',
+    "_ga": "GA1.1.299926138.1770045335",
+    "theme": "dark",
+    "kimi-auth": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc3MjY0MTAwMiwiaWF0IjoxNzcwMDQ5MDAyLCJqdGkiOiJkNjBjcnFuZnRhZTEzdmZ1OXJrZyIsInR5cCI6ImFjY2VzcyIsImFwcF9pZCI6ImtpbWkiLCJzdWIiOiJkNDlna3YzYWNjNGZla2NyNGMyMCIsInNwYWNlX2lkIjoiZDQ5Z2t1cmFjYzRmZWtjcjQ5NmciLCJhYnN0cmFjdF91c2VyX2lkIjoiZDQ5Z2t1cmFjYzRmZWtjcjQ5NjAiLCJzc2lkIjoiMTczMTQzNjE0NDY4NTE3MzUxOSIsImRldmljZV9pZCI6Ijc2MDIzMDIyNTM3ODUwODcyMzIiLCJyZWdpb24iOiJvdmVyc2VhcyIsIm1lbWJlcnNoaXAiOnsibGV2ZWwiOjEwfX0._Abf3gshAcVJjYAUkAm_zvgA9VPSP7MCeCy9CRvOnL6fgyt78DpJXq488TiRXNr6wCMh2srvP5XFvT4rxJyu4A"
 }
 
 
@@ -1760,11 +1744,111 @@ async def run_agent_post(req: AgentRequest, db: AsyncSession = Depends(get_db)):
 
 
 
+
+
+# --- OPENAI GPT-OSS-120B LOGIC (NVIDIA API) ---
+
+async def openai_chat_nvidia(prompt: str) -> str:
+    """Запрос к OpenAI GPT-OSS-120B через NVIDIA API"""
+
+    # Лучше вынести в .env, но оставляем как в оригинале
+    NVIDIA_API_KEY = "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"
+
+    headers = {
+        'Authorization': f'Bearer {NVIDIA_API_KEY}',
+        'Content-Type': 'application/json',
+    }
+
+    json_data = {
+        'model': 'openai/gpt-oss-120b',
+        'messages': [{'role': 'user', 'content': prompt}],
+        'temperature': 0.7, # Чуть убавил для стабильности, можно вернуть 1
+        'top_p': 1,
+        'stream': False,
+        'reasoning_effort': 'high'
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                'https://integrate.api.nvidia.com/v1/chat/completions',
+                headers=headers,
+                json=json_data,
+                timeout=120.0
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                # Возвращаем только контент
+                return data['choices'][0]['message']['content']
+            else:
+                # ВАЖНО: Вызываем ошибку, чтобы не возвращать текст ошибки как результат генерации
+                # и не списывать за это токены
+                raise HTTPException(status_code=502, detail=f"Nvidia API Error: {response.status_code}")
+        except HTTPException as he:
+            raise he
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Nvidia Execution Error: {str(e)}")
+
+async def process_openai_nvidia(key: str, prompt: str, db: AsyncSession):
+    """Обработка запроса к OpenAI через NVIDIA API с точным подсчетом токенов"""
+
+    # 1. Поиск ключа и пользователя
+    stmt = select(APIKey).where(APIKey.key_hash == key)
+    result = await db.execute(stmt)
+    api_key_obj = result.scalar_one_or_none()
+
+    if not api_key_obj:
+        raise HTTPException(status_code=403, detail="INVALID API KEY")
+
+    user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
+    user = user_result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=403, detail="USER NOT FOUND")
+
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    # 2. Проверка баланса (как в GPT/Gemini - просто должен быть положительным)
+    if not has_unlimited and user.tokens_balance <= 0:
+        raise HTTPException(status_code=402, detail="INSUFFICIENT GLOBAL BALANCE")
+
+    if api_key_obj.limit_tokens <= 0:
+        raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
+
+    # 3. Генерация ответа (здесь может вылететь ошибка, если API недоступен, и баланс не спишется)
+    ai_response = await openai_chat_nvidia(prompt)
+
+    # 4. Подсчет токенов (Input + Output)
+    # Используем ту же функцию get_token_count, что и для GPT
+    input_tokens_data = await get_token_count(prompt)
+    output_tokens_data = await get_token_count(ai_response)
+    
+    total_cost = input_tokens_data["tokenCount"] + output_tokens_data["tokenCount"]
+
+    # 5. Списание средств
+    if not has_unlimited:
+        user.tokens_balance -= total_cost 
+    
+    api_key_obj.limit_tokens -= total_cost 
+
+    await db.commit()
+    
+    return ai_response
+
+@app.get("/api/run/openai")
+async def run_openai_get(key: str, prompt: str = "Hello", db: AsyncSession = Depends(get_db)):
+    """GET endpoint для OpenAI GPT-OSS-120B"""
+    return await process_openai_nvidia(key, prompt, db)
+
+@app.post("/api/run/openai")
+async def run_openai_post(req: OpenAIRequest, db: AsyncSession = Depends(get_db)):
+    """POST endpoint для OpenAI GPT-OSS-120B"""
+    return await process_openai_nvidia(req.key, req.prompt, db)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
 
 
 
