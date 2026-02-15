@@ -141,6 +141,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -233,6 +234,7 @@
             <div class="sub-nav">
                 <button class="sub-tab-btn active" onclick="showDocSection('gpt', this)">GPT (TEXT)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('gemini', this)">GEMINI (TEXT)</button>
+                <button class="sub-tab-btn" onclick="showDocSection('openai', this)">OPENAI GPT-OSS</button>
                 <button class="sub-tab-btn" onclick="showDocSection('imagen', this)">IMAGEN (VISION)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('autodraw', this)">AUTODRAW (MAGIC)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('banana', this)">NANO-BANANA</button>
@@ -574,7 +576,63 @@ print(response.text)</pre>
                 </div>
             </div>
 
-            <!-- AGENT Documentation -->
+            
+            <!-- OpenAI GPT-OSS Documentation -->
+            <div id="doc-openai" class="doc-container">
+                <p data-i18n="doc_openai_desc">Access OpenAI GPT-OSS-120B model via NVIDIA API integration.</p>
+                <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/openai</code></p>
+                <p><strong>Method:</strong> <code style="color: var(--neon-blue);">GET</code> or <code style="color: var(--neon-purple);">POST</code></p>
+
+                <div class="code-block">
+                    <h3>Python (POST Request)</h3>
+                    <p style="color:#666; font-size:0.8rem;">Recommended for long prompts.</p>
+                    <pre>
+import requests
+
+url = "https://nexus-api-2026.vercel.app/api/run/openai"
+payload = {
+    "key": "sk-nx-XXXXXXXXXXXXXXXX",
+    "prompt": "Explain quantum computing in simple terms"
+}
+
+response = requests.post(url, json=payload)
+print(response.text)</pre>
+                </div>
+
+                <div class="code-block">
+                    <h3>Python (GET Request)</h3>
+                    <pre>
+import requests
+
+url = "https://nexus-api-2026.vercel.app/api/run/openai"
+params = {
+    "key": "sk-nx-XXXXXXXXXXXXXXXX",
+    "prompt": "Hello, how are you?"
+}
+
+response = requests.get(url, params=params)
+print(response.text)</pre>
+                </div>
+
+                <div class="code-block">
+                    <h3>JavaScript (Fetch) Example</h3>
+                    <pre>
+const apiKey = "sk-nx-XXXXXXXXXXXXXXXX";
+const prompt = "Write a Python function to calculate fibonacci";
+
+// POST request
+fetch("https://nexus-api-2026.vercel.app/api/run/openai", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key: apiKey, prompt: prompt })
+})
+.then(response => response.text())
+.then(data => console.log(data))
+.catch(err => console.error(err));</pre>
+                </div>
+            </div>
+
+<!-- AGENT Documentation -->
             <div id="doc-agent" class="doc-container">
                 <p data-i18n="doc_agent_desc">Access the advanced coding Nexus agent. Optimized for complex tasks and coding.</p>
                 <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/agent</code></p>
@@ -699,6 +757,7 @@ askAgent();</pre>
         "tok_count": "Token Count:",
         "tok_vis": "VISUALIZATION (TOKENS)",
         "doc_agent_desc": "Access the advanced coding agent. Optimized for complex tasks and coding.",
+        "doc_openai_desc": "Access OpenAI GPT-OSS-120B model.",
         "h_py_stream": "Python (Streaming)",
         "desc_py_stream": "Reads the response token by token as it generates.",
         "h_js_stream": "JavaScript (Fetch Stream)",
@@ -731,6 +790,7 @@ askAgent();</pre>
         "tok_count": "Token Count:",
         "tok_vis": "VISUALISATION (TOKENS)",
         "doc_agent_desc": "Access the advanced coding agent. Optimised for complex tasks and coding.",
+        "doc_openai_desc": "Access OpenAI GPT-OSS-120B model.",
         "h_py_stream": "Python (Streaming)",
         "desc_py_stream": "Reads the response token by token as it generates.",
         "h_js_stream": "JavaScript (Fetch Stream)",
@@ -764,6 +824,7 @@ askAgent();</pre>
         "tok_count": "Кол-во токенов:",
         "tok_vis": "ВИЗУАЛИЗАЦИЯ (ТОКЕНЫ)",
         "doc_agent_desc": "Доступ к продвинутому агенту-программисту. Оптимизирован для написания кода и сложных задач.",
+        "doc_openai_desc": "Доступ к модели OpenAI GPT-OSS-120B.",
         "h_py_stream": "Python (Потоковая передача)",
         "desc_py_stream": "Читает ответ токен за токеном по мере их генерации.",
         "h_js_stream": "JavaScript (Fetch Stream)",
@@ -796,6 +857,7 @@ askAgent();</pre>
         "tok_count": "Conteo de Tokens:",
         "tok_vis": "VISUALIZACIÓN (TOKENS)",
         "doc_agent_desc": "Accede al agente de programación avanzado. Optimizado para código y tareas complejas.",
+        "doc_openai_desc": "Acceso al modelo OpenAI GPT-OSS-120B.",
         "h_py_stream": "Python (Streaming)",
         "desc_py_stream": "Lee la respuesta token por token a medida que se genera.",
         "h_js_stream": "JavaScript (Fetch Stream)",
