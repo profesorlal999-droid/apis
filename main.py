@@ -381,18 +381,26 @@ IMAGEN_HEADERS = {
 
 def _sync_gemini_image_request(prompt: str, cookies: dict):
     """
-    Синхронная функция:
-    1. Отправляет запрос "Generate image: ..."
-    2. Парсит ответ на наличие ссылки
-    3. Скачивает картинку с теми же куками
-    4. Возвращает bytes картинки и новые cookies
+    Исправленная синхронная функция:
+    Использует тот же метод формирования пакета, что и работающий текстовый чат.
     """
     session = requests.Session()
     session.headers.update(IMAGEN_HEADERS)
     session.cookies.update(cookies)
     
-    # Подготовка запроса (Generate image + prompt)
+    # 1. Формируем запрос так же, как в текстовом чате
+    # Добавляем префикс, чтобы триггернуть генерацию картинки
     full_prompt = f"Generate image: {prompt}"
+    encoded_message = urllib.parse.quote(full_prompt)
+    
+    # ВАЖНО: Используем те же магические строки, что и в рабочем текстовом запросе.
+    # Google требует этот контекст (!Q0Cl...), иначе возвращает 400.
+    data_prefix = 'f.req=%5Bnull%2C%22%5B%5B%5C%22'
+    data_suffix = '%5C%22%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2C0%5D%2C%5B%5C%22ru%5C%22%5D%2C%5B%5C%22%5C%22%2C%5C%22%5C%22%2C%5C%22%5C%22%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5C%22%5C%22%5D%2C%5C%22!Q0ClQBjNAAZeabWMfmlCpnSCL5dFYOU7ADQBEArZ1Gc_anREocG2B2DF4zwI3mMyyuxLwB3yyOX-obdTN4OSl3a3tQxZZe63PRBHz5MpAgAAAZBSAAAAH2gBB34AQTHSxFe9uWaOZl9ZAQEUAZFB1PeSf5unoZqC5vOsTi1aMUiGGFfitq8c3XWaxLuoNi8p7lVS2y7a3qFwk_8X05YZmQMsSOzmJgrf0uyeL43D9vsDgTX10K9qD33A6c4jvTo03DSm4r0cy4wGl5inCOqH-PPyy55-U_yq2FJrGDCDV2unoVxdigUOrKDZNUiq81iK_kxQ36QGKL3pm8xbV1Rrf-1s-yk8rT82kecMfkaq_a-ugAWljDoxPz4e7URmws0yXqWHmBwkDrHHjdkoUfX9swDb0rJ_cuPt7oVbTb7ZEWwI6ZPx7Zg_AjM7z1iQSqYouQ5dDu3uiw_mtE3o1E9pnbGPCjUH5UXjaZhOT3wBmgbptjUbeEdKOz3qyZJe0kYJEGGQ1uaLltqrad2xC_4dImSFLP_9fxt5qZxSDOXMkgdrNQBBBTROv_WMyz7YZqkLhFy6UVSAhKx4-uN3tUjp-Q3yogjb6jrnhh2Uw6MFTQU8o_D8evKQgyb2uKokDYes1QRRUagKlCy9-W9RtUGaKGbqHK35ssJ_R6HXLGgYcWwkVyQDolevtmZUCH3hhKhZyHbBjCXHbs8uvPkd1tmPmbewcdrmBG-_Dfj3jodamuqVD4eVX0ltvi0UjbD6hxTUGdZBmQWsJnmIL4boG4jnGdz-qBUUtir5ycfP3P65QqaOQdCxCio5HiYFG4DAPkiwXZDUG_5KO68J4cph1zK9bOqMjlIvWwiKqIgIeEpdke8UJrq0aZ6RHfXu0I5lquyFiqlPwlmBMEo9DvNWI0DoFtWNPfTFHXrvCVyHL8E61k3Ti8ops_mj75HR670AzA160nowkWNHP6HS3QMZEJSXb-ybbfypWE0JnT1NGOMQdieDXq5-xVfg888XvDZov1qaLaNzU8XfCtmrEOjeTyV27yLFyNzN0fQfEK6Zq4_svnOsZer37EQPKMKi10FBkawsKgSb3bn74i3DTZOEc0M8zDZUcunyPjoCAvcmjsy_JvMQFNaj8y4lbSQ_Wf5lFJD79tE8jYdJuGUzKsyYKfP86W5t7guwQyia53Y2n0OFiGafu0tPhhEaIewYHu8UX0K96C1nCR4pWLkumW3490j7yN5iuOwe0VZVgeL3th_j8tiloh6kuKSbDys4utjQ57JU_Gd6H7HDYDzMptO8pFU%5C%22%2C%5C%2262806c58061d7d812a36fc661042319b%5C%22%2Cnull%2C%5B0%5D%2C1%2Cnull%2Cnull%2C1%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5B0%5D%5D%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C1%2Cnull%2Cnull%2C%5B4%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B1%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5C%221670C968-EBC3-4DC2-953A-E02A6ADDC428%5C%22%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2C1%5D%22%5D'
+    
+    # Собираем сырую строку данных, как в текстовом чате
+    data = f"{data_prefix}{encoded_message}{data_suffix}&at={IMAGEN_AT_TOKEN}&"
+
     req_id = int(random.random() * 10000000)
     
     params = {
@@ -402,20 +410,14 @@ def _sync_gemini_image_request(prompt: str, cookies: dict):
         '_reqid': str(req_id),
         'rt': 'c',
     }
-    
-    # Структура сообщения [[text], null, [context]]
-    message_structure = [[full_prompt], None, [None, None, None]]
-    f_req_value = json.dumps([None, json.dumps(message_structure)])
-    
-    post_data = {'f.req': f_req_value, 'at': IMAGEN_AT_TOKEN}
 
     try:
-        # 1. Запрос генерации
+        # 2. Отправляем запрос
         response = session.post(
-            'https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate',
+            'https://gemini.google.com/u/1/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate',
             params=params,
-            data=post_data,
-            timeout=3000 # Генерация может занять время
+            data=data, # Отправляем как строку (body), а не как словарь (form-data)
+            timeout=3000
         )
         
         if response.status_code != 200:
@@ -423,26 +425,22 @@ def _sync_gemini_image_request(prompt: str, cookies: dict):
             
         raw_response = response.text
         
-        # 2. Поиск ссылки (Regex из примера)
+        # 3. Поиск ссылки
         pattern = r'https://lh3\.googleusercontent\.com/gg-dl/[^"]+'
         found_urls = re.findall(pattern, raw_response)
         
         if not found_urls:
-            return {"error": "No image URL found in response. Verify prompt compliance."}
+            return {"error": "No image URL found. The prompt might be refused by safety filters."}
             
-        # Убираем возможный мусор в конце (как в примере пользователя [:-1])
-        # Но regex [^"]+ обычно останавливается перед кавычкой. 
-        # На всякий случай проверим, если ссылка валидная, requests справится.
         image_url = found_urls[0]
-        # Иногда regex захватывает лишний слэш экранирования, если ответ в JSON
         image_url = image_url.replace('\\', '')
         
-        # 3. Скачивание изображения
+        # 4. Скачивание
         img_resp = session.get(image_url, timeout=30)
         
         if img_resp.status_code == 200:
             return {
-                "image_data": img_resp.content, # bytes
+                "image_data": img_resp.content,
                 "cookies": session.cookies
             }
         else:
@@ -1847,6 +1845,7 @@ async def run_openai_post(req: OpenAIRequest, db: AsyncSession = Depends(get_db)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
