@@ -238,6 +238,7 @@
                 <button class="sub-tab-btn" onclick="showDocSection('imagen', this)">IMAGEN (VISION)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('autodraw', this)">AUTODRAW (MAGIC)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('banana', this)">NANO-BANANA</button>
+                <button class="sub-tab-btn" onclick="showDocSection('qwen', this)">QWEN 3.5 (THINKING)</button>
                 <button class="sub-tab-btn" onclick="showDocSection('agent', this)">AGENT (CODE)</button>
             </div>
 
@@ -538,6 +539,53 @@ async function recognize() {
                 </div>
             </div>
 
+
+            <!-- Qwen Documentation -->
+<div id="doc-qwen" class="doc-container">
+    <p>
+        <strong data-i18n="lbl_model">Model:</strong> 
+        Qwen 3.5 (<span data-i18n="doc_qwen_cot">Thinking Enabled</span>)
+    </p>
+    <p data-i18n="doc_qwen_desc">This model includes a "Chain of Thought" process, making it superior for logical reasoning, math, and complex instruction following.</p>
+    
+    <p><strong>Endpoint:</strong> <code style="color: #aaa;">/api/run/qwen</code></p>
+    <p><strong>Method:</strong> <code style="color: var(--neon-blue);">GET</code> or <code style="color: var(--neon-purple);">POST</code></p>
+
+    <div class="code-block">
+        <h3>Python (POST Request)</h3>
+        <pre>
+import requests
+
+url = "https://nexus-api-2026.vercel.app/api/run/qwen"
+payload = {
+    "key": "sk-nx-XXXXXXXXXXXXXXXX",
+    "prompt": "Solve this riddle: I speak without a mouth and hear without ears. I have no body, but I come alive with wind."
+}
+
+response = requests.post(url, json=payload)
+# Response will likely contain &lt;thinking&gt; tags followed by the answer
+print(response.text)</pre>
+    </div>
+
+    <div class="code-block">
+        <h3>JavaScript (Fetch)</h3>
+        <pre>
+const apiKey = "sk-nx-XXXXXXXXXXXXXXXX";
+
+fetch("https://nexus-api-2026.vercel.app/api/run/qwen", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+        key: apiKey, 
+        prompt: "Analyze the sentiment of this text: ..." 
+    })
+})
+.then(res => res.text())
+.then(console.log);</pre>
+    </div>
+</div>
+
+
             <!-- Gemini Documentation -->
             <div id="doc-gemini" class="doc-container">
                 <p data-i18n="doc_gem_desc">Access Google's Gemini Pro model via our reverse-engineered API.</p>
@@ -765,6 +813,9 @@ askAgent();</pre>
         "h_direct_link": "Direct Link",
         "desc_direct_link": "Paste in browser to see the output stream directly.",
         "nav_chat": "NEURAL CHAT",
+        "lbl_model": "Model:",
+        "doc_qwen_cot": "Thinking Enabled",
+        "doc_qwen_desc": "This model includes a \"Chain of Thought\" process, making it superior for logical reasoning, math, and complex instruction following."
     },
     "en-gb": {
         "doc_ban_desc": "High-quality image generation using the NANO-BANANA model.",
@@ -797,7 +848,10 @@ askAgent();</pre>
         "desc_js_stream": "Modern browser implementation using ReadableStream.",
         "h_direct_link": "Direct Link",
         "desc_direct_link": "Paste in browser to see the output stream directly.",
-        "nav_chat": "NEURAL CHAT"
+        "nav_chat": "NEURAL CHAT",
+        "lbl_model": "Model:",
+        "doc_qwen_cot": "Thinking Enabled",
+        "doc_qwen_desc": "This model includes a \"Chain of Thought\" process, making it superior for logical reasoning, maths, and complex instruction following."
     },
     "ru": {
         "doc_ban_desc": "Генерация высококачественных изображений с помощью модели NANO-BANANA.",
@@ -830,7 +884,10 @@ askAgent();</pre>
         "h_js_stream": "JavaScript (Fetch Stream)",
         "desc_js_stream": "Современная реализация в браузере через ReadableStream.",
         "h_direct_link": "Прямая ссылка",
-        "desc_direct_link": "Вставьте в браузер, чтобы увидеть поток вывода напрямую."
+        "desc_direct_link": "Вставьте в браузер, чтобы увидеть поток вывода напрямую.",
+        "lbl_model": "Модель:",
+        "doc_qwen_cot": "С рассуждением",
+        "doc_qwen_desc": "Эта модель использует процесс «Цепочки мыслей» (CoT), что делает её идеальной для логики, математики и сложных инструкций."
     },
     "es": {
         "doc_ban_desc": "Generación de imágenes de alta calidad con el modelo NANO-BANANA.",
@@ -863,7 +920,10 @@ askAgent();</pre>
         "h_js_stream": "JavaScript (Fetch Stream)",
         "desc_js_stream": "Implementación moderna en navegador usando ReadableStream.",
         "h_direct_link": "Enlace Directo",
-        "desc_direct_link": "Pega en el navegador para ver el flujo de salida directamente."
+        "desc_direct_link": "Pega en el navegador para ver el flujo de salida directamente.",
+        "lbl_model": "Modelo:",
+        "doc_qwen_cot": "Razonamiento Activo",
+        "doc_qwen_desc": "Este modelo incluye un proceso de 'Cadena de Pensamiento', haciéndolo superior para lógica, matemáticas e instrucciones complejas."
     }
 };
 
