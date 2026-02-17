@@ -234,6 +234,7 @@
                 <option value="gemini">GEMINI (TEXT)</option>
                 <option value="openai">OPENAI GPT-OSS-120B (TEXT)</option>
                 <option value="banana">NANO-BANANA (IMAGE)</option>
+                <option value="qwen">QWEN 3.5 (REASONING)</option>
             </select>
         </div>
 
@@ -451,6 +452,7 @@
                     const contentDiv = appendMessage('PROCESSING...', 'ai');
                     let endpoint = '/api/run/gemini';
                     if (model === 'gpt') endpoint = '/api/run/gpt';
+                    else if (model === 'qwen') endpoint = '/api/run/qwen';
                     else if (model === 'openai') endpoint = '/api/run/openai';
                     const response = await fetch(`${endpoint}?key=${key}&prompt=${encodeURIComponent(text)}&model=auto`);
                     const data = await response.text(); 
