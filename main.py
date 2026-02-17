@@ -1859,14 +1859,13 @@ async def qwen_chat_nvidia(prompt: str) -> str:
     json_data = {
         'model': 'qwen/qwen3.5-397b-a17b',
         'messages': [{'role': 'user', 'content': prompt}],
-        
         'temperature': 1,
         'top_p': 0.95,
         'top_k': 20,
         'presence_penalty': 0,
         'repetition_penalty': 1,
         'stream': False, # Используем False для простоты интеграции с текущим фронтом
-        'chat_template_kwargs': {"enable_thinking": False} # Включаем Thinking
+        'chat_template_kwargs': {"enable_thinking": True} # Включаем Thinking
     }
 
     async with httpx.AsyncClient() as client:
@@ -1945,6 +1944,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
