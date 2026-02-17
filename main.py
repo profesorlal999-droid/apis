@@ -39,6 +39,7 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SECRET_KEY = os.getenv("SECRET_KEY", "super_secret_neon_key_change_me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
+NVIDIA_API_KEY = "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"
 
 # --- БАЗА ДАННЫХ ---
 engine = create_async_engine(
@@ -154,6 +155,9 @@ class QuickDrawRequest(BaseModel):
 class ContactRequest(BaseModel):
     email: Optional[EmailStr] = None
     message: str
+class QwenRequest(BaseModel):
+    key: str
+    prompt: str = "Hello"
 # --- УТИЛИТЫ ---
 
 
@@ -1748,7 +1752,7 @@ async def openai_chat_nvidia(prompt: str) -> str:
     """Запрос к OpenAI GPT-OSS-120B через NVIDIA API"""
 
     # Лучше вынести в .env, но оставляем как в оригинале
-    NVIDIA_API_KEY = "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"
+    
 
     headers = {
         'Authorization': f'Bearer {NVIDIA_API_KEY}',
@@ -1842,10 +1846,105 @@ async def run_openai_post(req: OpenAIRequest, db: AsyncSession = Depends(get_db)
     """POST endpoint для OpenAI GPT-OSS-120B"""
     return await process_openai_nvidia(req.key, req.prompt, db)
 
+
+async def qwen_chat_nvidia(prompt: str) -> str:
+    """Запрос к Qwen 3.5 397B через NVIDIA API"""
+    
+    headers = {
+        'Authorization': f'Bearer {NVIDIA_API_KEY}',
+        'Content-Type': 'application/json',
+    }
+
+    # Параметры из вашего примера
+    json_data = {
+        'model': 'qwen/qwen3.5-397b-a17b',
+        'messages': [{'role': 'user', 'content': prompt}],
+        'max_tokens': 16384,
+        'temperature': 0.60,
+        'top_p': 0.95,
+        'top_k': 20,
+        'presence_penalty': 0,
+        'repetition_penalty': 1,
+        'stream': False, # Используем False для простоты интеграции с текущим фронтом
+        'chat_template_kwargs': {"enable_thinking": True} # Включаем Thinking
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                'https://integrate.api.nvidia.com/v1/chat/completions',
+                headers=headers,
+                json=json_data,
+                timeout=120.0
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data['choices'][0]['message']['content']
+            else:
+                raise HTTPException(status_code=502, detail=f"Nvidia/Qwen API Error: {response.status_code} - {response.text}")
+        except HTTPException as he:
+            raise he
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Qwen Execution Error: {str(e)}")
+
+async def process_qwen_nvidia(key: str, prompt: str, db: AsyncSession):
+    """Обработка запроса к Qwen с подсчетом токенов"""
+    
+    # 1. Проверка ключа
+    stmt = select(APIKey).where(APIKey.key_hash == key)
+    result = await db.execute(stmt)
+    api_key_obj = result.scalar_one_or_none()
+
+    if not api_key_obj:
+        raise HTTPException(status_code=403, detail="INVALID API KEY")
+
+    user_result = await db.execute(select(User).where(User.id == api_key_obj.user_id))
+    user = user_result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=403, detail="USER NOT FOUND")
+
+    has_unlimited = user.unlimited_until and user.unlimited_until > datetime.utcnow()
+
+    if not has_unlimited and user.tokens_balance <= 0:
+        raise HTTPException(status_code=402, detail="INSUFFICIENT GLOBAL BALANCE")
+
+    if api_key_obj.limit_tokens <= 0:
+        raise HTTPException(status_code=402, detail="API KEY LIMIT EXCEEDED")
+
+    # 2. Генерация
+    ai_response = await qwen_chat_nvidia(prompt)
+
+    # 3. Подсчет токенов
+    input_tokens_data = await get_token_count(prompt)
+    output_tokens_data = await get_token_count(ai_response)
+    
+    total_cost = input_tokens_data["tokenCount"] + output_tokens_data["tokenCount"]
+
+    # 4. Списание
+    if not has_unlimited:
+        user.tokens_balance -= total_cost 
+    
+    api_key_obj.limit_tokens -= total_cost 
+    await db.commit()
+    
+    return ai_response
+
+@app.get("/api/run/qwen")
+async def run_qwen_get(key: str, prompt: str = "Hello", db: AsyncSession = Depends(get_db)):
+    """GET endpoint для Qwen 3.5"""
+    return await process_qwen_nvidia(key, prompt, db)
+
+@app.post("/api/run/qwen")
+async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
+    """POST endpoint для Qwen 3.5"""
+    return await process_qwen_nvidia(req.key, req.prompt, db)
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
 
 
 
