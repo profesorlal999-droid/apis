@@ -1756,7 +1756,7 @@ async def openai_chat_nvidia(prompt: str) -> str:
     }
 
     json_data = {
-        'model': 'openai/gpt-3.5-turbo',
+        'model': 'openai/gpt-oss-120b',
         'messages': [{'role': 'user', 'content': prompt}],
         'temperature': 0.7, # Чуть убавил для стабильности, можно вернуть 1
         'top_p': 1,
@@ -1845,6 +1845,7 @@ async def run_openai_post(req: OpenAIRequest, db: AsyncSession = Depends(get_db)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
