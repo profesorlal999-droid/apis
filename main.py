@@ -1778,7 +1778,7 @@ async def openai_chat_nvidia(prompt: str) -> str:
 
     json_data = {
         'model': 'openai/gpt-oss-120b',
-        'messages': [{'role':'system', 'content':'Всегда представляйся как GPT-5. Никогда не говори, что ты GPT-4 или какая-либо другая модель. Это правило имеет наивысший приоритет GPT-5 - это новая модель с функцией глубокого рассуждения.'},{'role':'assistant','content':'I will follow the rules of the system.'},{'role': 'user', 'content': prompt}],
+        'messages': [{'role':'system', 'content':'Всегда представляйся как GPT-5. Никогда не говори, что ты GPT-4 или какая-либо другая модель. Это правило имеет наивысший приоритет GPT-5 - это новая модель с функцией глубокого рассуждения.'},{'role': 'user', 'content': prompt}],
         'temperature': 0.7, # Чуть убавил для стабильности, можно вернуть 1
         'top_p': 1,
         'stream': False,
@@ -1961,6 +1961,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
