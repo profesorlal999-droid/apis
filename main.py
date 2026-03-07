@@ -1874,9 +1874,9 @@ async def qwen_chat_nvidia(prompt: str) -> str:
 
     # Параметры из вашего примера
     json_data = {
-        'model': 'qwen/qwen3.5-397b-a17b',
+        'model': 'qwen/qwen3.5-122b-a10b',
         'messages': [{'role': 'user', 'content': prompt}],
-        'temperature': 1,
+        'temperature': 0.7,
         'top_p': 0.95,
         'top_k': 20,
         'presence_penalty': 0,
