@@ -514,8 +514,9 @@ def create_access_token(data: dict):
 
 import tiktoken
 
-_enc = tiktoken.get_encoding("cl200k_base")
+_enc = tiktoken.get_encoding("cl100k_base")
 
+# Заменить функцию get_token_count целиком:
 async def get_token_count(text: str) -> dict:
     if not text:
         return {"tokenCount": 0, "string_tokens": []}
@@ -526,7 +527,6 @@ async def get_token_count(text: str) -> dict:
         string_tokens = [b.decode('utf-8', errors='replace') for b in token_bytes_list]
         return {"tokenCount": len(token_ids), "string_tokens": string_tokens}
     
-    # Запускаем синхронный tiktoken в пуле потоков, не блокируя event loop
     return await asyncio.to_thread(_sync_tokenize, text)
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
@@ -1536,8 +1536,7 @@ async def tokenize_text_endpoint(
     req: TokenizeRequest,
     user: User = Depends(get_current_user)
 ):
-    result = await get_token_count(req.text)
-    return result  # вернёт {"tokenCount": N, "string_tokens": ["Hello", " world", ...]}
+    return await get_token_count(req.text)
 
 
 
@@ -1925,6 +1924,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
