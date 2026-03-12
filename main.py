@@ -33,7 +33,7 @@ from sqlalchemy import LargeBinary # Добавить к импортам sqlalc
 # --- КОНФИГУРАЦИЯ ---
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL") # Например: postgresql+asyncpg://user:pass@host/db
+DATABASE_URL = "postgresql+asyncpg://postgres.ermvjuubnzlkgrbtbsyf:Timur123353219@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SECRET_KEY = os.getenv("SECRET_KEY", "super_secret_neon_key_change_me")
@@ -1924,6 +1924,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
