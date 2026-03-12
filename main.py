@@ -514,32 +514,20 @@ def create_access_token(data: dict):
 
 import tiktoken
 
-_enc = tiktoken.get_encoding("cl100k_base")
+_enc = tiktoken.get_encoding("cl200k_base")
 
 async def get_token_count(text: str) -> dict:
-    print(f"[TOK_FN] called with text={repr(text[:30])}, empty={not text}")
-    
     if not text:
-        print(f"[TOK_FN] returning 0 because text is empty/falsy")
         return {"tokenCount": 0, "string_tokens": []}
     
-    try:
-        print(f"[TOK_FN] calling _enc.encode...")
-        token_ids = _enc.encode(text)
-        print(f"[TOK_FN] encoded, got {len(token_ids)} tokens")
-        
+    def _sync_tokenize(t: str):
+        token_ids = _enc.encode(t)
         token_bytes_list = _enc.decode_tokens_bytes(token_ids)
         string_tokens = [b.decode('utf-8', errors='replace') for b in token_bytes_list]
-        
-        print(f"[TOK_FN] done, returning {len(token_ids)} tokens")
         return {"tokenCount": len(token_ids), "string_tokens": string_tokens}
-        
-    except Exception as e:
-        print(f"[TOK_FN] EXCEPTION: {type(e).__name__}: {e}")
-        import traceback
-        traceback.print_exc()
-        fallback = list(text)
-        return {"tokenCount": len(fallback), "string_tokens": fallback}
+    
+    # Запускаем синхронный tiktoken в пуле потоков, не блокируя event loop
+    return await asyncio.to_thread(_sync_tokenize, text)
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -1548,22 +1536,8 @@ async def tokenize_text_endpoint(
     req: TokenizeRequest,
     user: User = Depends(get_current_user)
 ):
-    import time
-    t0 = time.time()
-    
-    print(f"[TOK] >>> REQUEST RECEIVED")
-    print(f"[TOK] text repr: {repr(req.text[:50])}")
-    print(f"[TOK] text len: {len(req.text)}")
-    print(f"[TOK] text is empty: {not req.text}")
-    print(f"[TOK] text bool: {bool(req.text)}")
-    
     result = await get_token_count(req.text)
-    
-    t1 = time.time()
-    print(f"[TOK] <<< RESULT: {result}")
-    print(f"[TOK] Time taken: {t1-t0:.3f}s")
-    
-    return result
+    return result  # вернёт {"tokenCount": N, "string_tokens": ["Hello", " world", ...]}
 
 
 
@@ -1951,6 +1925,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
