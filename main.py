@@ -512,62 +512,21 @@ def create_access_token(data: dict):
 
 
 
-# КЛЮЧЕВЫЕ ИЗМЕНЕНИЯ:
-# 1. [а-яёА-ЯЁ\u0400-\u04FF]+ — вся кириллица (включая казахский/украинский) как СЛОВО
-# 2. \d+                       — цифры группируются ("27" = 1 токен, не два)
-# 3. [a-zA-Z]+                 — ASCII буквы группируются (потом case-split)
-_TOKENIZER_PATTERN = re.compile(
-    r"'(?:s|t|re|ve|m|ll|d)|"       # English contractions
-    r"[a-zA-Z]+|"                    # ASCII слова
-    r"[\u0400-\u04FF]+|"             # Кириллица (русский, казахский, украинский и т.д.)
-    r"\d+|"                          # Цифры группой
-    r"[ \t]+|"                       # Пробелы/табы группой
-    r"[\r\n]+|"                      # Переносы строк
-    r"[^\s]",                        # Всё остальное — по одному символу
-    re.UNICODE
-)
+import tiktoken
 
-def _split_by_case(word: str) -> list:
-    """HEllo → ['HE', 'llo'], Hello → ['Hello'], ABCDef → ['ABC', 'Def']"""
-    if not word or word.islower() or word.isupper():
-        return [word]
-    if word[0].isupper() and word[1:].islower():
-        return [word]
-
-    tokens = []
-    start = 0
-    i = 1
-    while i < len(word):
-        if word[i].islower() and word[i-1].isupper() and (i - start) > 1:
-            tokens.append(word[start:i-1])
-            start = i - 1
-        elif word[i].isupper() and word[i-1].islower():
-            tokens.append(word[start:i])
-            start = i
-        i += 1
-    tokens.append(word[start:])
-    return tokens
-
+_enc = tiktoken.get_encoding("cl100k_base")
 
 async def get_token_count(text: str) -> dict:
     if not text:
         return {"tokenCount": 0, "string_tokens": []}
-
     try:
-        raw_chunks = _TOKENIZER_PATTERN.findall(text)
-        tokens: list[str] = []
-
-        for chunk in raw_chunks:
-            if chunk.isascii() and chunk.isalpha():
-                tokens.extend(_split_by_case(chunk))
-            else:
-                tokens.append(chunk)
-
+        token_ids = _enc.encode(text)
+        # Декодируем каждый токен обратно в строку для string_tokens
+        string_tokens = [_enc.decode([t]) for t in token_ids]
         return {
-            "tokenCount": len(tokens),
-            "string_tokens": tokens
+            "tokenCount": len(token_ids),
+            "string_tokens": string_tokens
         }
-
     except Exception as e:
         print(f"[Tokenizer Error] {e}")
         fallback = list(text)
@@ -1959,6 +1918,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
