@@ -48,6 +48,17 @@ engine = create_async_engine(
     connect_args={"statement_cache_size": 0}
 )
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
 Base = declarative_base()
 
 class User(Base):
@@ -1949,6 +1960,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
