@@ -521,8 +521,11 @@ async def get_token_count(text: str) -> dict:
         return {"tokenCount": 0, "string_tokens": []}
     try:
         token_ids = _enc.encode(text)
-        # Декодируем каждый токен обратно в строку для string_tokens
-        string_tokens = [_enc.decode([t]) for t in token_ids]
+        
+        # ПРАВИЛЬНЫЙ способ: decode_tokens_bytes обрабатывает неполные UTF-8 байты
+        token_bytes_list = _enc.decode_tokens_bytes(token_ids)
+        string_tokens = [b.decode('utf-8', errors='replace') for b in token_bytes_list]
+        
         return {
             "tokenCount": len(token_ids),
             "string_tokens": string_tokens
@@ -1918,6 +1921,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
