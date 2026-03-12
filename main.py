@@ -511,7 +511,6 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-import re
 
 # КЛЮЧЕВЫЕ ИЗМЕНЕНИЯ:
 # 1. [а-яёА-ЯЁ\u0400-\u04FF]+ — вся кириллица (включая казахский/украинский) как СЛОВО
@@ -1960,6 +1959,7 @@ async def run_qwen_post(req: QwenRequest, db: AsyncSession = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
